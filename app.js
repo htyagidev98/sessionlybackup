@@ -51,19 +51,26 @@ app.use(
 
 // Auth API routes
 app.use("/", require("./routes/authRoute"));
+
 // Admin API routes
 app.use("/admin", require("./routes/categoryRoute"));
 app.use("/admin", require("./routes/userRoute"));
 app.use("/admin", require("./routes/couponRoute"));
+app.use("/admin", require("./routes/profileRoute"));
+
 // Teacher API routes
 app.use("/teacher", require("./routes/teacherRoute"));
 app.use("/teacher", require("./routes/courseRoute"));
+
 // Common API routes
 app.use("/common", require("./routes/commonRoute"));
+
 // Stripe-Payment API routes
 app.use("/", require("./routes/paymentRoute"));
+
 // Apppointment API routes
 app.use("/", require("./routes/appointmentRoute"));
+
 ///socket cors
 const io = require("socket.io")(server, {
     cors: {

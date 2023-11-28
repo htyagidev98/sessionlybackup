@@ -129,7 +129,6 @@ exports.searchExperts = async (req, res) => {
                 { $skip: limit * page },
                 { $limit: limit },
             ]);
-            // console.log("filter", filter)
             if (filter.length > 0) {
                 let expertData = [];
                 for (let i = 0; i < filter.length; i++) {
@@ -148,9 +147,7 @@ exports.searchExperts = async (req, res) => {
                         expertObj.teacher_country_origin = filter[i].userDetails?.country_origin
                     // expertObj.createdAt = moment(filter[i].createdAt).format("DD-MM-YYYY h:mm:ss A"),
                     // expertObj.updatedAt = moment(filter[i].updatedAt).format("DD-MM-YYYY h:mm:ss A")
-
                     let profile = await Profile.find({ teacher: `${filter[i].teacher}` })
-                    // console.log("profile", profile)
                     for (let j = 0; j < profile.length; j++) {
                         if (profile.length > 0) {
                             expertObj.profile_id = profile[j]?._id,
@@ -234,7 +231,6 @@ exports.teacherAvailabities = async (req, res) => {
         let availableData = await UserAvailabilities.findOne({ teacher: teacherId }).populate({
             path: "teacher", select: "first_name last_name email phone country_origin role account_info"
         }).lean();
-        // console.log("ProfileData", ProfileData)
         if (availableData) {
             const data = {
                 _id: availableData._id,
@@ -329,7 +325,6 @@ exports.studentTransactionList = async (req, res) => {
 
 ////Get Student Profile details///
 exports.studentProfileDetails = async (req, res) => {
-    // console.log(req.user._id)
     try {
         let studentData = await User.findById(req.user._id).lean();
         if (studentData) {
@@ -387,7 +382,7 @@ exports.updateStudentProfile = async (req, res) => {
                 }
                 const data = await User.findByIdAndUpdate({ _id: user._id }, updateData, { new: true });
                 res.status(200).json({
-                    status: "success", responseMessage: " Expert Details Updated Successfully", responseData: updateData
+                    status: "success", responseMessage: " Expert Details Updated Successfully", responseData: data
                 });
             } else {
                 res.status(404).json({

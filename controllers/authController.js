@@ -95,7 +95,7 @@ exports.logIn = async (req, res) => {
                             last_name: user.last_name, email: user.email,
                             role: user.role
                         };
-                        let token = jwt.sign(payload, config.secret, { expiresIn: '30d' });
+                        let token = jwt.sign(payload, config.secret);  //{ expiresIn: '30d' }
                         let uuid = uuidv1();
                         let deviceInfo = [];
                         deviceInfo = _.filter(user.device, (device) => device.uuid != uuid);

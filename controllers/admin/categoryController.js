@@ -119,7 +119,7 @@ exports.updateCategory = async (req, res) => {
                 status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
             });
         } else {
-            const { title, description, image_url } = req.body;
+            const { title, description, image_url } = req.body; // If there is no file but an image_url is provided in the req body..
             const { _id } = req.query;
             let categoryData = await Category.findById(_id).lean();
             if (categoryData) {

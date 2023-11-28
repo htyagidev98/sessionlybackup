@@ -23,7 +23,6 @@ exports.userPayment = async (req, res) => {
                 name: `${req.user.first_name} ${req.user.last_name}`,
                 email: req.user.email,
                 description: 'Example Charge',
-                // business_vat_id: 'acct_1NsgDPSGZG5DL3Xo', // Provide your business registration number
                 // description: 'My First Test Customer (created for API docs at https://www.stripe.com/docs/api)',
             });
             const paymentIntent = await stripe.paymentIntents.create({
@@ -110,7 +109,7 @@ exports.paymentConfirm = async (req, res) => {
 exports.getPaymentList = async (req, res) => {
     try {
         const paymentList = await Payment.find()
-            .select("customer_id name userEmail amount status")
+            .select("customer_id name userEmail amount status createdAt updatedAt")
             .populate([
                 {
                     path: "course_id", select: "title description price duration image_url teacher",

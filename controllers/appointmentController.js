@@ -98,7 +98,7 @@ exports.getBookAppointment = async (req, res) => {
 exports.studentBookAppointment = async (req, res) => {
     try {
         const appointment = await Appointment.find({ student: req.user._id })
-            .select("appointment_date appointment_time status")
+            .select("appointment_date appointment_time status createdAt updatedAt")
             .populate([
                 { path: "student", select: "first_name last_name email role phone" },
                 { path: "teacher", select: "first_name last_name email role phone" },

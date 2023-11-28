@@ -3,7 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const { xAccessToken, isTeacher } = require('../middlewares/xAccessToken');
-const { teacherRegister, updateExpertsProfile, updateAvailabities, StudentsList, teacherPaymentList, teacherBookAppointment, teacherProfileDetails } = require('../controllers/teacher/teacherController');
+const { teacherRegister, updateExpertsProfile, updateAvailabities, StudentsList, teacherPaymentList,
+    teacherBookAppointment, teacherProfileDetails, updateExpertProflePicture } = require('../controllers/teacher/teacherController');
 
 // Image,file Upload 
 const storage = multer.diskStorage({
@@ -45,5 +46,6 @@ router.get('/students/list', xAccessToken, isTeacher, StudentsList);
 router.get('/teacher/payment/list', xAccessToken, isTeacher, teacherPaymentList);
 router.get('/teacher/book/appointment', xAccessToken, isTeacher, teacherBookAppointment);
 router.get('/teacher/profile/details', xAccessToken, isTeacher, teacherProfileDetails);
+router.put('/update/expert/profile/pic', xAccessToken, isTeacher, upload.single("profile_pic"), updateExpertProflePicture);
 
 module.exports = router;

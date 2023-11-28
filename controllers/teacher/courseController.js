@@ -51,20 +51,14 @@ exports.courseAdd = async (req, res) => {
 ////////GET All Course  api////////
 exports.getAllCourse = async (req, res) => {
     try {
-        const course = await Course.find({ teacher: req.user._id })
-            .select("title description price duration status image_url")
+        const courseData = await Course.find({ teacher: req.user._id })
+            .select("title description price duration status image_url createdAt updatedAt")
             .populate([
                 { path: "category", select: "title description status image_url subcategories" },
                 { path: "teacher", select: "first_name last_name email role phone" },
             ])
             .sort({ createdAt: -1 })
             .lean();
-        // Format createdAt and updatedAt using moment
-        const courseData = course.map(course => ({
-            ...course,
-            createdAt: moment(course.createdAt).format("DD-MM-YYYY h:mm:ss A"),
-            updatedAt: moment(course.updatedAt).format("DD-MM-YYYY h:mm:ss A"),
-        }));
         if (courseData && courseData.length > 0) {
             res.status(200).json({
                 status: "success",
@@ -131,7 +125,7 @@ exports.updateCourse = async (req, res) => {
                 status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
             });
         } else {
-            const { title, description, price, category, duration, image_url } = req.body;
+            const { title, description, price, category, duration, image_url } = req.body; // If there is no file but an image_url is provided in the req body..
             const { _id } = req.query;
             let courseData = await Course.findById(_id).lean();
             if (courseData) {
@@ -147,7 +141,7 @@ exports.updateCourse = async (req, res) => {
                     const coursePicturesFilename = req.file.filename;
                     const imageURL = `${process.env.API_DOMAIN}/course_pictures/${coursePicturesFilename}`;
                     updateData.image_url = imageURL;
-                } else if (image_url) {
+                } else if (image_url) { 
                     updateData.image_url = image_url
                 }
                 const data = await Course.findByIdAndUpdate({ _id: courseData._id },

@@ -34,19 +34,9 @@ exports.teacherRegister = async (req, res) => {
             });
         } else {
             const videoFileSize = req.files[1].size;
-            // console.log(req.files[1].size, "req.files[1].size;")
             const videoFileName = req.files[1].filename;
             // const thumbnailFileName = req.files[0].filename;
             const profilePictureFileName = req.files[0].filename;
-            // const videoFilePath = req.files[0].path;
-            // const videoFileDuration = videoDuration(videoFilePath);
-            // const videoFileDuration = await getVideoDurationInSeconds(
-            //     videoFilePath
-            // ).then((duration) => {
-            //     console.log(duration)
-            //     let duration_ = Math.floor(duration);
-            //     return duration_;
-            // });
             const { first_name, last_name, email, password, country_origin, phone } = req.body.user;
             const { language, level, subject_taught, hourly_rate, head_line, about_the_expert } = req.body.profile;
             const { time_zone, day, time_from, time_to } = req.body.availability;
@@ -178,14 +168,12 @@ exports.updateAvailabities = async (req, res) => {
     }
 };
 
-//TEACHER Profile details
+//Get TEACHER Profile details
 exports.teacherProfileDetails = async (req, res) => {
     try {
-        const { teacherId } = req.query;
-        let ProfileData = await Profile.findOne({ teacher: teacherId }).populate({
+        let ProfileData = await Profile.findOne({ teacher: req.user._id }).populate({
             path: "teacher", select: "first_name last_name email phone country_origin role account_info"
         }).lean();
-        // console.log("ProfileData", ProfileData)
         if (ProfileData) {
             const data = {
                 _id: ProfileData._id,
@@ -225,7 +213,7 @@ exports.updateExpertsProfile = async (req, res) => {
     try {
         const rules = {
             first_name: "required", last_name: "required", email: "required",
-            country_origin: "required", phone: "required|digits_between:10,14"
+            phone: "required|digits_between:10,14"
         };
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
@@ -233,19 +221,18 @@ exports.updateExpertsProfile = async (req, res) => {
                 status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
             });
         } else {
-            const { first_name, last_name, email, country_origin, phone } = req.body;
+            const { first_name, last_name, email, phone } = req.body;
             let user = await User.findById(req.user._id).lean();
             if (user) {
                 let updateData = {
                     first_name: first_name,
                     last_name: last_name,
                     email: email,
-                    country_origin: country_origin,
                     phone: phone
                 }
                 const data = await User.findByIdAndUpdate({ _id: user._id }, updateData, { new: true });
                 res.status(200).json({
-                    status: "success", responseMessage: " Expert Details Updated Successfully", responseData: updateData
+                    status: "success", responseMessage: " Expert Details Updated Successfully", responseData: data
                 });
             } else {
                 res.status(404).json({
@@ -261,7 +248,41 @@ exports.updateExpertsProfile = async (req, res) => {
     }
 };
 
-//Expert side student list
+//////////Update profile Picture/////////
+exports.updateExpertProflePicture = async (req, res) => {
+    try {
+        let profile = await Profile.findOne({ teacher: req.user._id }).lean();
+        if (profile) {
+            const { image_url } = req.body; // If there is no file but an image_url is provided in the req body..
+
+            let updateData = {};
+            if (req.file) {
+                const profilePictureFileName = req.file.filename;
+                const imageURL = `${process.env.API_DOMAIN}/profile_pictures/${profilePictureFileName}`;
+                updateData.image_url = imageURL;
+            } else if (image_url) {
+                updateData.image_url = image_url
+            }
+            const data = await Profile.findByIdAndUpdate({ _id: profile._id }, updateData,
+                { new: true });
+            res.status(200).json({
+                status: "success", responseMessage: " Profile Picture Updated Successfully", responseData: data
+            });
+
+        } else {
+            res.status(404).json({
+                status: "error", responseMessage: "Profile Picture not found", responseData: {}
+            });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: "error", responseMessage: "Internal Server Error", responseData: {}
+        });
+    }
+};
+
+//Get Expert side student list
 exports.StudentsList = async (req, res) => {
     try {
         const studentslist = await Payment.find({ teacher_id: req.user._id })
@@ -295,7 +316,7 @@ exports.StudentsList = async (req, res) => {
     };
 };
 
-///Expert payment list////
+///Get Expert payment list////
 exports.teacherPaymentList = async (req, res) => {
     try {
         const paymentList = await Payment.find({ teacher_id: req.user._id })
@@ -333,7 +354,7 @@ exports.teacherPaymentList = async (req, res) => {
     };
 }
 
-/// get teacher appointment
+/// Get teacher appointment
 exports.teacherBookAppointment = async (req, res) => {
     try {
         const appointment = await Appointment.find({ teacher: req.user._id })
