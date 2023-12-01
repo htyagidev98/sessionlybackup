@@ -31,7 +31,7 @@ exports.userPayment = async (req, res) => {
                 // payment_method: 'pm_card_visa', //customer.default_source on live
                 payment_method: 'pm_card_threeDSecureRequired', //customer.default_source on live
                 amount: amount * 100,
-                currency: 'INR',  //USD
+                currency: 'USD',
                 description: 'Example Charge',
                 metadata: {
                     integration_check: 'accept_a_payment',
@@ -121,8 +121,8 @@ exports.getPaymentList = async (req, res) => {
             ]).sort({ createdAt: -1 }).lean();
         if (paymentList && paymentList.length > 0) {
             const totalAmount = paymentList.reduce((
-                sum, paymentLists) => sum + paymentLists.amount, 0 
-                );
+                sum, paymentLists) => sum + paymentLists.amount, 0
+            );
             res.status(200).json({
                 status: "success",
                 counts: paymentList.length,
@@ -131,7 +131,9 @@ exports.getPaymentList = async (req, res) => {
                 responseData: paymentList,
             });
         } else {
-            res.status(404).json({ status: "error", responseMessage: "paymentList Not Found", responseData: {} })
+            res.status(404).json({
+                status: "error", responseMessage: "paymentList Not Found", responseData: {}
+            })
         }
     } catch (err) {
         console.error(err);

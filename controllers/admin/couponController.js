@@ -121,8 +121,9 @@ exports.updateCoupon = async (req, res,) => {
             };
         }
     } catch (err) {
+        console.error(err);
         res.status(500).json({
-            responseMessage: "Internal Server Error", responseData: {},
+            status: "error", responseMessage: "Internal Server Error", responseData: {},
         });
     }
 };

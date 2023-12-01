@@ -6,12 +6,9 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const cors = require('cors');
 const path = require('path');
-// const socketIO = require('socket.io');
-const http = require('http');
 const app = express();
-const server = http.createServer(app);
-// const io = socketIO(server);
 require("dotenv").config();
+
 // Connect Database
 connectDB();
 
@@ -38,6 +35,11 @@ app.use(bodyParser.urlencoded({
     parameterLimit: 50000,
 }));
 
+// Server running port
+const http = app.listen(process.env.PORT, process.env.HOSTNAME, () => {
+    console.log(`Server running at http://${process.env.HOSTNAME}:${process.env.PORT}`);
+});
+
 // Session middleware
 app.use(
     session({
@@ -49,6 +51,14 @@ app.use(
     })
 );
 
+const io = require('./socket').init(http)
+io.on('connection', (socket) => {
+    console.log('A user connected');
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+    });
+});
+
 // Auth API routes
 app.use("/", require("./routes/authRoute"));
 
@@ -57,6 +67,8 @@ app.use("/admin", require("./routes/categoryRoute"));
 app.use("/admin", require("./routes/userRoute"));
 app.use("/admin", require("./routes/couponRoute"));
 app.use("/admin", require("./routes/profileRoute"));
+// Notification API routes
+app.use("/admin", require("./routes/notificationRoute"));
 
 // Teacher API routes
 app.use("/teacher", require("./routes/teacherRoute"));
@@ -71,33 +83,5 @@ app.use("/", require("./routes/paymentRoute"));
 // Apppointment API routes
 app.use("/", require("./routes/appointmentRoute"));
 
-///socket cors
-const io = require("socket.io")(server, {
-    cors: {
-        origin: "*",
-        methods: "GET,POST,PUT,DELETE,OPTIONS",
-        // allowedHeaders: ["my-custom-header"],
-        credentials: true
-    }
-})
-app.use(cors());
 
-// Socket.io connection
-io.on('connection', (socket) => {
-    console.log('A user connected');
-    // Static user data
-    const staticUserData = {
-        userId: '123',
-        userName: 'John Doe'
-    };
-    // Send static user data to the connected client
-    socket.emit('staticUserData', staticUserData);
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
-});
 
-// Server running port
-server.listen(process.env.PORT, process.env.HOSTNAME, () => {
-    console.log(`Server running at http://${process.env.HOSTNAME}:${process.env.PORT}`);
-});

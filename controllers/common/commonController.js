@@ -38,9 +38,7 @@ exports.allCategories = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error",
-            responseMessage: "Internal Server Error",
-            responseData: {},
+            status: "error", responseMessage: "Internal Server Error", responseData: {},
         });
     }
 };
@@ -76,9 +74,9 @@ exports.getCategorylist = async (req, res) => {
     }
 };
 
-//Search Experts
+//Search Experts by category
 exports.searchExperts = async (req, res) => {
-    const { pages, limits, category, subCategory } = req.query;
+    const { pages, limits, category, subCategory, teacherName } = req.query;
     let page = 0;
     if (pages) {
         page = parseInt(pages);
@@ -99,6 +97,7 @@ exports.searchExperts = async (req, res) => {
             if (subCategory) {
                 matchQuery['category.subcategories.sub_title'] = { $regex: new RegExp(subCategory, 'i') };
             }
+
             filter = await Course.aggregate([
                 {
                     $lookup: {
@@ -161,7 +160,6 @@ exports.searchExperts = async (req, res) => {
                         }
                     }
                     expertData.push(expertObj);
-
                 }
                 res.status(200).json({
                     status: "success",
@@ -181,7 +179,8 @@ exports.searchExperts = async (req, res) => {
             status: "error", responseMessage: "Internal Server Error", responseData: {}
         });
     }
-}
+};
+
 
 // Get TEACHER Profile details
 exports.teacherProfileDetails = async (req, res) => {
@@ -238,8 +237,8 @@ exports.teacherAvailabities = async (req, res) => {
                 time_from: availableData.time_from,
                 time_to: availableData.time_to,
                 teacher: availableData.teacher,
-                createdAt: moment(availableData.createdAt).format("DD-MM-YYYY h:mm:ss A"),
-                updatedAt: moment(availableData.updatedAt).format("DD-MM-YYYY h:mm:ss A"),
+                createdAt: moment(availableData.createdAt).format("YYYY-MM-DD h:mm:ss A"),
+                updatedAt: moment(availableData.updatedAt).format("YYYY-MM-DD h:mm:ss A"),
             }
             res.status(200).json({
                 status: "success", responseMessage: "Fetch Successfully", responseData: data,
@@ -336,8 +335,8 @@ exports.studentProfileDetails = async (req, res) => {
                 phone: studentData.phone,
                 role: studentData.role,
                 status: studentData.account_info.status,
-                createdAt: moment(studentData.createdAt).format("DD-MM-YYYY h:mm:ss A"),
-                updatedAt: moment(studentData.updatedAt).format("DD-MM-YYYY h:mm:ss A")
+                createdAt: moment(studentData.createdAt).format("YYYY-MM-DD h:mm:ss A"),
+                updatedAt: moment(studentData.updatedAt).format("YYYY-MM-DD h:mm:ss A")
             }
             res.status(200).json({
                 status: "success", responseMessage: "Fetch Successfully", responseData: data,
@@ -397,3 +396,5 @@ exports.updateStudentProfile = async (req, res) => {
         });
     }
 };
+
+

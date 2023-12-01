@@ -31,10 +31,7 @@ const AccountInfoSchema = new Schema({
 });
 
 const UserSchema = new Schema({
-    // address: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Address",
-    // },
+
     first_name: {
         type: String,
         required: true,

@@ -67,14 +67,14 @@ exports.getAllCourse = async (req, res) => {
                 responseData: courseData,
             });
         } else {
-            res.status(404).json({ status: "error", responseMessage: "Courses Not Found", responseData: {} });
+            res.status(404).json({
+                status: "error", responseMessage: "Courses Not Found", responseData: {}
+            });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error",
-            responseMessage: "Internal Server Error",
-            responseData: {},
+            status: "error", responseMessage: "Internal Server Error", responseData: {},
         });
     }
 };
@@ -98,14 +98,16 @@ exports.getCourse = async (req, res) => {
                 status: course.status,
                 teacher: course.teacher,
                 category: course.category,
-                createdAt: moment(course.createdAt).format("DD-MM-YYYY h:mm:ss A"),
-                updatedAt: moment(course.updatedAt).format("DD-MM-YYYY h:mm:ss A"),
+                createdAt: moment(course.createdAt).format("YYYY-MM-DD h:mm:ss A"),
+                updatedAt: moment(course.updatedAt).format("YYYY-MM-DD h:mm:ss A"),
             };
             res.status(200).json({
                 status: "success", responseMessage: "Successfully", responseData: courseData,
             });
         } else {
-            res.status(404).json({ status: "error", responseMessage: "Course Not Found", responseData: {} });
+            res.status(404).json({
+                status: "error", responseMessage: "Course Not Found", responseData: {}
+            });
         }
     } catch (err) {
         console.error(err);
@@ -141,7 +143,7 @@ exports.updateCourse = async (req, res) => {
                     const coursePicturesFilename = req.file.filename;
                     const imageURL = `${process.env.API_DOMAIN}/course_pictures/${coursePicturesFilename}`;
                     updateData.image_url = imageURL;
-                } else if (image_url) { 
+                } else if (image_url) {
                     updateData.image_url = image_url
                 }
                 const data = await Course.findByIdAndUpdate({ _id: courseData._id },
@@ -171,19 +173,17 @@ exports.deleteCourse = async (req, res) => {
             { $set: { status: "inactive" }, }, { new: true });
         if (deletedCourse) {
             res.status(200).json({
-                status: "success",
-                responseMessage: 'Deleted Successfully',
-                responseData: {}
+                status: "success", responseMessage: 'Deleted Successfully', responseData: {}
             });
         } else {
             res.status(404).json({
-                status: "error",
-                responseMessage: 'Course Not FOund',
-                responseData: {}
+                status: "error", responseMessage: 'Course Not FOund', responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
-        res.status(500).json({ status: "error", responseMessage: 'Internal Server Error', responseData: {} });
+        res.status(500).json({
+            status: "error", responseMessage: 'Internal Server Error', responseData: {}
+        });
     }
 };

@@ -128,6 +128,30 @@ exports.teacherRegister = async (req, res) => {
     }
 };
 
+//get Expert Availabity//
+exports.getExpertAvailabity = async (req, res) => {
+    try {
+        const availability = await UserAvailabilities.findOne({ teacher: req.user._id },
+            { time_zone: 1, day: 1, time_from: 1, time_to: 1, createdAt: 1, updatedAt: 1 }).populate(
+                { path: "teacher", select: "first_name last_name email role phone" }
+            ).lean();
+        if (availability) {
+            res.status(200).json({
+                status: "success", responseMessage: "Successfully", responseData: availability,
+            });
+        } else {
+            res.status(404).json({
+                status: "error", responseMessage: "Availability Not Found", responseData: {}
+            });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: "error", responseMessage: "Internal Server Error", responseData: {},
+        });
+    }
+};
+
 //UpdateAvailabities
 exports.updateAvailabities = async (req, res) => {
     try {
@@ -139,8 +163,7 @@ exports.updateAvailabities = async (req, res) => {
             });
         } else {
             const { time_zone, day, time_from, time_to } = req.body;
-            const { _id } = req.query;
-            let AvailabilityData = await UserAvailabilities.findById(_id).lean();
+            let AvailabilityData = await UserAvailabilities.findOne({ teacher: req.user._id }).lean();
             if (AvailabilityData) {
                 let updateData = {
                     time_zone: time_zone,
@@ -306,7 +329,9 @@ exports.StudentsList = async (req, res) => {
                 responseData: studentslist,
             });
         } else {
-            res.status(404).json({ status: "error", responseMessage: "Student List Not Found", responseData: {} });
+            res.status(404).json({
+                status: "error", responseMessage: "Student List Not Found", responseData: {}
+            });
         }
     } catch (err) {
         console.error(err);
@@ -344,7 +369,9 @@ exports.teacherPaymentList = async (req, res) => {
                 responseData: paymentList,
             });
         } else {
-            res.status(404).json({ status: "error", responseMessage: "Payment List Not Found", responseData: {} });
+            res.status(404).json({
+                status: "error", responseMessage: "Payment List Not Found", responseData: {}
+            });
         }
     } catch (err) {
         console.error(err);
@@ -374,7 +401,9 @@ exports.teacherBookAppointment = async (req, res) => {
                 responseData: appointment,
             });
         } else {
-            res.status(404).json({ status: "error", responseMessage: "Appointment Not Found", responseData: {} });
+            res.status(404).json({
+                status: "error", responseMessage: "Appointment Not Found", responseData: {}
+            });
         }
     } catch (err) {
         console.error(err);

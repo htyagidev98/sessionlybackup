@@ -1,10 +1,12 @@
 const User = require('../models/user')
+const Notification = require('../models/notification')
 const jwt = require("jsonwebtoken")
 const Validator = require("validatorjs")
 const bcrypt = require("bcryptjs")
 const config = require("../config")
 const sendEmail = require("../middlewares/emailSend");
 const crypto = require('crypto');
+const fun = require("../middlewares/webSocket")
 uuidv1 = require("uuid").v1
 moment = require("moment-timezone")
 _ = require("lodash");
@@ -23,7 +25,7 @@ exports.signUp = async (req, res) => {
                 responseMessage: "Validation Error", responseData: validation.errors.all(),
             });
         } else {
-            const { first_name, last_name, email, password, confirm_password, phone, role } = req.body;
+            const { first_name, last_name, email, password, confirm_password, phone } = req.body;
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).*$/;
             const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!regex.test(email)) {
@@ -52,6 +54,7 @@ exports.signUp = async (req, res) => {
                         password: hashPassword,
                         account_info: { status: "active" }
                     });
+                    fun.webNotification(userData);
                     res.status(201).json({
                         status: "success", responseMessage: "User Registered Successfully", responseData: userData
                     });
@@ -106,6 +109,7 @@ exports.logIn = async (req, res) => {
                         await User.findByIdAndUpdate({ _id: user._id, }, { $set: { device: deviceInfo } },
                             { new: false });
                         let userDetails = await User.findOne({ _id: user._id, }).lean();
+                        // fun.webNotification(userDetails);
                         res.status(200).json({
                             status: "success",
                             responseMessage: "LoggedIn Successfully",

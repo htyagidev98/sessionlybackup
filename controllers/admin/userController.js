@@ -103,7 +103,7 @@ exports.updateUser = async (req, res) => {
                 status: "error", responseMessage: "User not found", responseData: {}
             });
         }
-        // }
+        
     } catch (err) {
         console.error(err);
         res.status(500).json({

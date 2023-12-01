@@ -38,7 +38,8 @@ const CategorySchema = new Schema({
         default: 'active'
     },
     subcategories: [SubcategorySchema],
-}, { timestamps: true, toJSON: true });
+}, { timestamps: true, toJSON: true }
+);
 
 CategorySchema.set("toObject", { virtuals: true });
 CategorySchema.set('toJSON', { virtuals: true });
