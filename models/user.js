@@ -54,7 +54,6 @@ const UserSchema = new Schema({
     },
     country_origin: {
         type: String,
-        // required: true,
     },
     role: {
         type: String,

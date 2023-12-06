@@ -11,15 +11,14 @@ _ = require("lodash");
 
 
 //GET All Category Common api
-
 exports.allCategories = async (req, res) => {
     try {
         const categories = await Category.find()
             .select({
                 title: 1, description: 1, image_url: 1, status: 1,
                 subcategories: { $ifNull: ['$subcategories', []] },
-                createdAt: 1,          //Using 1: Indicates that the field should be included in the result
-                updatedAt: 1,
+                createdAt: 1,
+                updatedAt: 1,  //1: Indicates that the field should be included in the result
             })
             .sort({ createdAt: -1 })
             .lean();
@@ -49,7 +48,7 @@ exports.getCategorylist = async (req, res) => {
         const categories = await Category.find({ subcategories: { $size: 0 } }).select({
             title: 1, description: 1, image_url: 1, status: 1,
             subcategories: [],
-            createdAt: 1,                    //Using 1: Indicates that the field should be included in the result
+            createdAt: 1,
             updatedAt: 1,
         })
             .sort({ createdAt: -1 })
@@ -76,12 +75,12 @@ exports.getCategorylist = async (req, res) => {
 
 //Search Experts by category
 exports.searchExperts = async (req, res) => {
-    const { pages, limits, category, subCategory, teacherName } = req.query;
+    const { pages, limits, category, subCategory } = req.query;
     let page = 0;
     if (pages) {
         page = parseInt(pages);
     }
-    let limit = 15;
+    let limit = 8;
     if (limits) {
         limit = parseInt(limits);
     }
@@ -132,7 +131,9 @@ exports.searchExperts = async (req, res) => {
                 let expertData = [];
                 for (let i = 0; i < filter.length; i++) {
                     let expertObj = {};
-                    expertObj.course_id = filter[i]?._id,
+                    expertObj.category_id = filter[i]?.category?._id,
+                        expertObj.category_title = filter[i]?.category?.title,
+                        expertObj.course_id = filter[i]?._id,
                         expertObj.course_title = filter[i]?.title,
                         expertObj.course_description = filter[i]?.description,
                         expertObj.price = filter[i]?.price,
@@ -144,8 +145,6 @@ exports.searchExperts = async (req, res) => {
                         expertObj.teacher_email = filter[i].userDetails?.email,
                         expertObj.teacher_phone = filter[i].userDetails?.phone,
                         expertObj.teacher_country_origin = filter[i].userDetails?.country_origin
-                    // expertObj.createdAt = moment(filter[i].createdAt).format("DD-MM-YYYY h:mm:ss A"),
-                    // expertObj.updatedAt = moment(filter[i].updatedAt).format("DD-MM-YYYY h:mm:ss A")
                     let profile = await Profile.find({ teacher: `${filter[i].teacher}` })
                     for (let j = 0; j < profile.length; j++) {
                         if (profile.length > 0) {
@@ -274,7 +273,9 @@ exports.getAllCourse = async (req, res) => {
                 responseData: course,
             });
         } else {
-            res.status(404).json({ status: "error", responseMessage: "Courses Not Found", responseData: {} })
+            res.status(404).json({
+                status: "error", responseMessage: "Courses Not Found", responseData: {}
+            })
         }
     } catch (err) {
         console.error(err);

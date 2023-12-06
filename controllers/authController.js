@@ -1,12 +1,12 @@
 const User = require('../models/user')
-const Notification = require('../models/notification')
 const jwt = require("jsonwebtoken")
 const Validator = require("validatorjs")
 const bcrypt = require("bcryptjs")
 const config = require("../config")
 const sendEmail = require("../middlewares/emailSend");
 const crypto = require('crypto');
-const fun = require("../middlewares/webSocket")
+const fun = require("../middlewares/webSocket");
+const messages = require("../utils/messages");
 uuidv1 = require("uuid").v1
 moment = require("moment-timezone")
 _ = require("lodash");
@@ -56,7 +56,7 @@ exports.signUp = async (req, res) => {
                     });
                     fun.webNotification(userData);
                     res.status(201).json({
-                        status: "success", responseMessage: "User Registered Successfully", responseData: userData
+                        status: "success", responseMessage: messages.SIGN_UP_SUCCESS, responseData: userData
                     });
                 } else {
                     res.status(403).json({
@@ -109,10 +109,10 @@ exports.logIn = async (req, res) => {
                         await User.findByIdAndUpdate({ _id: user._id, }, { $set: { device: deviceInfo } },
                             { new: false });
                         let userDetails = await User.findOne({ _id: user._id, }).lean();
-                        // fun.webNotification(userDetails);
+                        fun.loginNotification(userDetails);
                         res.status(200).json({
-                            status: "success",
-                            responseMessage: "LoggedIn Successfully",
+                            status: messages.SUCCESS_STATUS,
+                            responseMessage: messages.LOGIN_SUCCESS,
                             responseData: {
                                 _id: userDetails._id,
                                 first_name: userDetails.first_name,

@@ -1,7 +1,6 @@
 const Category = require('../../models/category')
 const Validator = require("validatorjs"),
-    moment = require("moment-timezone")
-_ = require("lodash");
+    _ = require("lodash");
 
 //////Category Add//////
 exports.categoryAdd = async (req, res) => {
@@ -9,47 +8,58 @@ exports.categoryAdd = async (req, res) => {
         const rules = { title: "required", description: "required" };
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
-            res.status(422).json({
-                status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
+            return res.status(422).json({
+                status: "error",
+                responseMessage: "Validation Error",
+                responseData: validation.errors.all(),
             });
-        } else {
-            const { title, description, sub_title, sub_description } = req.body;
-            let existingCategory = await Category.findOne({ title: title }).lean();
-            if (!existingCategory) {
-                const categoryPicturesFilename = req.file.filename;
-                if (!req.file) {
-                    res.status(422).json({
-                        status: "error", responseMessage: "File not provided",
-                    });
-                }
-                let newCategory = await Category.create({
-                    title: title,
-                    description: description,
-                    image_url: `${process.env.API_DOMAIN}/category_pictures/${categoryPicturesFilename}`,
-                })
-                res.status(201).json({
-                    status: "success", responseMessage: "Category Added Successfully",
-                    responseData: newCategory
-                });
-            } else {
-                let Subcategory = [];
-                Subcategory.push({
-                    sub_title: sub_title,
-                    sub_description: sub_description,
-                    parent_id: existingCategory._id
-                });
-                const categoryData = await Category.findByIdAndUpdate({ _id: existingCategory._id, }, { $push: { subcategories: Subcategory } },
-                    { new: true });
-                res.status(201).json({
-                    status: "success", responseMessage: "Category Updated Successfully",
-                    responseData: categoryData
+        };
+        const { title, description, sub_title, sub_description } = req.body;
+        let existingCategory = await Category.findOne({ title: title }).lean();
+        if (!existingCategory) {
+            const categoryPicturesFilename = req.file.filename;
+            if (!req.file) {
+                return res.status(422).json({
+                    status: "error",
+                    responseMessage: "File not provided",
                 });
             }
+            let newCategory = await Category.create({
+                title: title,
+                description: description,
+                image_url: `${process.env.API_DOMAIN}/category_pictures/${categoryPicturesFilename}`,
+            });
+            return res.status(201).json({
+                status: "success", responseMessage: "Category Added Successfully", responseData: newCategory,
+            });
+        } else {
+            const existingSubcategory = existingCategory.subcategories.find(
+                (sub) => sub.sub_title === sub_title
+            );
+            if (existingSubcategory) {
+                return res.status(422).json({
+                    status: "error", responseMessage: "Subcategory already exists in the category", responseData: {},
+
+                });
+            }
+            const newSubcategory = {
+                sub_title: sub_title,
+                sub_description: sub_description,
+                parent_id: existingCategory._id,
+            };
+            const categoryData = await Category.findByIdAndUpdate(
+                { _id: existingCategory._id },
+                { $push: { subcategories: newSubcategory } },
+                { new: true }
+            );
+            return res.status(201).json({
+                status: "success", responseMessage: "Category Updated Successfully", responseData: categoryData,
+            });
         }
     } catch (err) {
         console.error(err);
-        res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+        return res.status(500).json({
+            status: "error", responseMessage: "Internal Server Error", responseData: {},
         });
     }
 };
@@ -81,9 +91,7 @@ exports.getAllCategory = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error",
-            responseMessage: "Internal Server Error",
-            responseData: {},
+            status: "error", responseMessage: "Internal Server Error", responseData: {},
         });
     }
 };
@@ -93,7 +101,8 @@ exports.getCategory = async (req, res) => {
     try {
         const { _id } = req.query;
         const categoryData = await Category.findOne({ _id: _id })
-            .populate('subcategories', 'sub_title sub_description parent_id').lean();
+            .populate('subcategories', 'sub_title sub_description parent_id')
+            .lean();
         if (categoryData) {
             res.status(200).json({
                 status: "success", responseMessage: "Successfully", responseData: categoryData,
@@ -172,7 +181,9 @@ exports.deleteCategory = async (req, res) => {
         }
     } catch (err) {
         console.error(err);
-        res.status(500).json({ status: "error", responseMessage: 'Internal Server Error', responseData: {} });
+        res.status(500).json({
+            status: "error", responseMessage: 'Internal Server Error', responseData: {}
+        });
     }
 };
 

@@ -4,23 +4,29 @@ const NotificationSchema = new Schema(
     {
         user: {
             type: mongoose.Schema.Types.ObjectId,
-            require: true
+            ref: 'User',
+        },
+        teacher: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
         },
         user_name: {
             type: String,
-            require: true
+        },
+        user_email: {
+            type: String,
         },
         user_role: {
             type: String,
-            require: true
         },
         title: {
             type: String,
-            require: true
         },
         text: {
             type: String,
-            require: true
+        },
+        amount: {
+            type: Number,
         },
         read: {
             type: Boolean,
@@ -28,8 +34,15 @@ const NotificationSchema = new Schema(
         },
         date: {
             type: Date,
-            require: true
+        },
+        status: {
+            type: String,
         }
+        // device_id: {
+        //     type: String,
+        //     require: false,
+        //     default: null
+        // }
     }, { timestamps: true, toJSON: true }
 );
 NotificationSchema.set("toObject", { virtuals: true });

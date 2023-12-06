@@ -36,8 +36,7 @@ const PaymentSchema = new Schema({
     },
     status: {
         type: String,
-        // enum: ['active', 'inactive','pending'],
-        default: ''
+        required: true,
     },
 },
     { timestamps: true, toJSON: true }

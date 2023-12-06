@@ -3,7 +3,13 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const { xAccessToken, isAdmin } = require('../middlewares/xAccessToken');
-const { categoryAdd, getAllCategory, getCategory, updateCategory, deleteCategory } = require('../controllers/admin/categoryController');
+const {
+    categoryAdd,
+    getAllCategory,
+    getCategory,
+    updateCategory,
+    deleteCategory
+} = require('../controllers/admin/categoryController');
 
 // Image Upload 
 const storage = multer.diskStorage({

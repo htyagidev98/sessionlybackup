@@ -14,31 +14,32 @@ exports.courseAdd = async (req, res) => {
             });
         } else {
             const { title, description, price, category, duration } = req.body;
-            const courseExist = await Course.findOne({ title: title }).lean();
-            if (!courseExist) {
-                const coursePicturesFilename = req.file.filename;
-                if (!req.file) {
-                    res.status(422).json({
-                        status: "error", responseMessage: "File not provided",
-                    });
-                }
-                let courseData = await Course.create({
-                    teacher: req.user._id,
-                    title: title,
-                    price: parseFloat(price).toFixed(2),
-                    description: description,
-                    duration: duration,
-                    category: category,
-                    image_url: `${process.env.API_DOMAIN}/course_pictures/${coursePicturesFilename}`
-                });
-                res.status(201).json({
-                    status: "success", responseMessage: " Course Add Successfully", responseData: courseData
-                });
-            } else {
-                res.status(403).json({
-                    status: "error", responseMessage: "Course Exist", responseData: {}
+            // const courseExist = await Course.findOne({ title: title }).lean();
+            // if (courseExist) {
+            const coursePicturesFilename = req.file.filename;
+            if (!req.file) {
+                res.status(422).json({
+                    status: "error", responseMessage: "File not provided",
                 });
             }
+            let courseData = await Course.create({
+                teacher: req.user._id,
+                title: title,
+                price: parseFloat(price).toFixed(2),
+                description: description,
+                duration: duration,
+                category: category,
+                image_url: `${process.env.API_DOMAIN}/course_pictures/${coursePicturesFilename}`
+            });
+            res.status(201).json({
+                status: "success", responseMessage: " Course Add Successfully", responseData: courseData
+            });
+            // } else {
+            //     res.status(403).json({
+            //         status: "error", responseMessage: "Course E", responseData: {}
+            //     });
+            // }
+            // }
         }
     } catch (err) {
         console.error(err);
@@ -46,7 +47,7 @@ exports.courseAdd = async (req, res) => {
             status: "error", responseMessage: "Internal Server Error", responseData: {}
         });
     }
-};
+}
 
 ////////GET All Course  api////////
 exports.getAllCourse = async (req, res) => {
@@ -68,7 +69,7 @@ exports.getAllCourse = async (req, res) => {
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Courses Not Found", responseData: {}
+                status: "error", responseMessage: "No Courses ", responseData: {}
             });
         }
     } catch (err) {

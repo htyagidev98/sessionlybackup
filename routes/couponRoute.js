@@ -1,5 +1,11 @@
-const { couponAdd, getCoupon, getAllCoupon, updateCoupon, deleteCoupon } = require('../controllers/admin/couponController')
-const { xAccessToken, isAdmin } = require('../middlewares/xAccessToken')
+const {
+    couponAdd,
+    getCoupon,
+    getAllCoupon,
+    updateCoupon,
+    deleteCoupon
+} = require('../controllers/admin/couponController');
+const { xAccessToken, isAdmin } = require('../middlewares/xAccessToken');
 const express = require('express');
 router = express.Router();
 

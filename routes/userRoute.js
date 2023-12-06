@@ -1,5 +1,11 @@
-const { getUsersList, getStudentsList, getTeachersList, updateUser, deleteUser } = require('../controllers/admin/userController')
-const { xAccessToken, isAdmin } = require('../middlewares/xAccessToken')
+const {
+    getUsersList,
+    getStudentsList,
+    getTeachersList,
+    updateUser,
+    deleteUser
+} = require('../controllers/admin/userController');
+const { xAccessToken, isAdmin } = require('../middlewares/xAccessToken');
 const express = require('express');
 router = express.Router();
 

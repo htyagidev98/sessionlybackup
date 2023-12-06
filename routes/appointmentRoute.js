@@ -1,5 +1,10 @@
-const { bookAppointment, getBookAppointment, studentBookAppointment, getAppointmentTime } = require('../controllers/appointmentController')
-const { xAccessToken } = require('../middlewares/xAccessToken')
+const {
+    bookAppointment,
+    getBookAppointment,
+    studentBookAppointment,
+    getAppointmentTime
+} = require('../controllers/appointmentController');
+const { xAccessToken } = require('../middlewares/xAccessToken');
 const express = require('express');
 router = express.Router();
 

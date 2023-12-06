@@ -137,7 +137,7 @@ exports.getAppointmentTime = async (req, res) => {
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Appointment Not Found", responseData: {}
+                status: "error", responseMessage: "No Appointment ", responseData: {}
             });
         }
     } catch (err) {

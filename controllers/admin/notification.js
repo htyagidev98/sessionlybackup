@@ -1,19 +1,19 @@
-const User = require('../../models/user')
-const Notification = require('../../models/notification')
-const Validator = require("validatorjs")
+const Notification = require('../../models/notification');
 moment = require("moment-timezone")
 _ = require("lodash");
 
 //get All Notification
 exports.getAllNotifications = async (req, res) => {
     try {
-        const notifications = await Notification.find().sort({ createdAt: -1 }).lean();
+        const notifications = await Notification.find()
+            .sort({ createdAt: -1 })
+            .lean();
         if (notifications) {
             res.status(200).json({
                 status: "success",
                 counts: notifications.length,
                 responseMessage: "Successfully",
-                responseData: notifications,
+                responseData: notifications
             });
         } else {
             res.status(400).json({
@@ -39,8 +39,8 @@ exports.markOneNotificationasread = async (req, res) => {
         if (notificationsData) {
             res.status(200).json({
                 status: "success",
-                responseMessage: `Notifications for user ${notificationsData.user_name}marked as read`,
-                responseData: { notificationsData }
+                responseMessage: `Notifications for user ${notificationsData.user_name} marked as read`,
+                responseData: notificationsData
             });
         } else {
             res.status(404).json({
@@ -59,8 +59,8 @@ exports.markAllNotificationasread = async (req, res) => {
     try {
         const notificationsData = await Notification.find({ "read": false },
             { new: true }).lean();
-        if (notificationsData.length > 0) {
-            await Notification.updateMany({ "read": false }, { $set: { "read": true } });
+        if (notificationsData && notificationsData.length > 0) {
+            updateData = await Notification.updateMany({ "read": false }, { $set: { "read": true } }).lean();
             res.status(200).json({
                 status: "success",
                 responseMessage: `All Notifications for user marked as read`,

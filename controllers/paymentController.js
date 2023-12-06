@@ -2,6 +2,7 @@ const Payment = require("../models/payment");
 const Validator = require("validatorjs");
 const config = require("../config")
 const stripe = require('stripe')(config.STRIPE_SECRET);
+const fun = require("../middlewares/webSocket");
 moment = require("moment-timezone");
 _ = require("lodash");
 
@@ -22,7 +23,14 @@ exports.userPayment = async (req, res) => {
                 source: token,
                 name: `${req.user.first_name} ${req.user.last_name}`,
                 email: req.user.email,
-                description: 'Example Charge',
+                address: {
+                    line1: '510 Townsend St',
+                    postal_code: '98140',
+                    city: 'San Francisco',
+                    state: 'CA',
+                    country: 'US',
+                },
+                description: 'Purchase',
                 // description: 'My First Test Customer (created for API docs at https://www.stripe.com/docs/api)',
             });
             const paymentIntent = await stripe.paymentIntents.create({
@@ -31,7 +39,7 @@ exports.userPayment = async (req, res) => {
                 // payment_method: 'pm_card_visa', //customer.default_source on live
                 payment_method: 'pm_card_threeDSecureRequired', //customer.default_source on live
                 amount: amount * 100,
-                currency: 'USD',
+                currency: 'USD', //USD
                 description: 'Example Charge',
                 metadata: {
                     integration_check: 'accept_a_payment',
@@ -59,6 +67,7 @@ exports.userPayment = async (req, res) => {
                     teacher_id: teacher_id,
                     status: paymentIntentconfirm.status
                 });
+                fun.paymentNotification(data)
             }
             res.status(200).json({
                 status: "success", responseMessage: "Successfully", responseData: paymentIntentconfirm
@@ -94,6 +103,8 @@ exports.paymentConfirm = async (req, res) => {
             teacher_id: confirmintent.metadata.teacher_id,
             status: confirmintent.status
         });
+        // console.log("data", data)
+        fun.paymentNotification(data)
         res.status(201).json({
             status: "success", responseMessage: "Payment Successfully", responseData: { confirmintent, data }
         });

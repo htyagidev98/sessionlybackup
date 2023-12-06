@@ -1,15 +1,14 @@
 const User = require("../../models/user");
 const Profile = require("../../models/profile");
 const UserAvailabilities = require("../../models/userAvailabities");
-const Course = require('../../models/course');
 const Appointment = require('../../models/appointment');
 const Payment = require('../../models/payment')
 const mongoose = require('mongoose');
 const bcrypt = require("bcryptjs");
-const getVideoDurationInSeconds = require("get-video-duration");
 const sendEmail = require('../../middlewares/emailSend');
 // const videoDuration = require('../../middlewares/videoDuration');
 const Validator = require("validatorjs");
+const fun = require("../../middlewares/webSocket");
 moment = require("moment-timezone")
 _ = require("lodash");
 const saltRounds = 10;
@@ -72,6 +71,7 @@ exports.teacherRegister = async (req, res) => {
                         account_info: { status: "pending" }
                     });
                     await user.save({ session });
+                    fun.webNotification(user);
 
                     const profile = new Profile({
                         language: language,
@@ -85,7 +85,6 @@ exports.teacherRegister = async (req, res) => {
                         image_url: `${process.env.API_DOMAIN}/profile_pictures/${profilePictureFileName}`,
                         // thumbnail_url: `${process.env.API_DOMAIN}thumbnails/${thumbnailFileName}`,
                         video_size: videoFileSize,
-                        // video_duration: videoFileDuration,
                     });
                     await profile.save({ session });
                     const availability = new UserAvailabilities({
@@ -99,7 +98,9 @@ exports.teacherRegister = async (req, res) => {
                     const transporter = sendEmail();
                     const emailHtml = `
                 <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <p>'Your account is still pending. Please wait for 5 days for activation.'.</p>
+                <p style="margin-bottom: 20px;">You are receiving this email.
+                Your account Status is still pending. Please wait for 5 days for activation.
+                </p>
                 </div>
             `;
                     await transporter.sendMail({
@@ -132,7 +133,8 @@ exports.teacherRegister = async (req, res) => {
 exports.getExpertAvailabity = async (req, res) => {
     try {
         const availability = await UserAvailabilities.findOne({ teacher: req.user._id },
-            { time_zone: 1, day: 1, time_from: 1, time_to: 1, createdAt: 1, updatedAt: 1 }).populate(
+            { time_zone: 1, day: 1, time_from: 1, time_to: 1, createdAt: 1, updatedAt: 1 })
+            .populate(
                 { path: "teacher", select: "first_name last_name email role phone" }
             ).lean();
         if (availability) {

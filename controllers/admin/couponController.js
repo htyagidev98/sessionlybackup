@@ -1,6 +1,5 @@
 const Coupon = require("../../models/coupon");
 const Validator = require("validatorjs"),
-    moment = require("moment-timezone")
 _ = require("lodash");
 
 //Add coupon
@@ -145,7 +144,9 @@ exports.deleteCoupon = async (req, res) => {
         }
     } catch (err) {
         console.error(err);
-        res.status(500).json({ status: "error", responseMessage: 'Internal Server Error', responseData: {} });
+        res.status(500).json({
+            status: "error", responseMessage: 'Internal Server Error', responseData: {}
+        });
     }
 }
 

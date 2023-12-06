@@ -3,7 +3,13 @@ const multer = require('multer');
 const path = require('path');
 router = express.Router();
 const { xAccessToken, isTeacher } = require('../middlewares/xAccessToken');
-const { courseAdd, getAllCourse, getCourse, updateCourse, deleteCourse } = require("../controllers/teacher/courseController")
+const {
+    courseAdd,
+    getAllCourse,
+    getCourse,
+    updateCourse,
+    deleteCourse
+} = require("../controllers/teacher/courseController");
 
 // Image Upload 
 const storage = multer.diskStorage({

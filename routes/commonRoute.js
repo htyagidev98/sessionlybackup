@@ -1,4 +1,14 @@
-const { allCategories, getCategorylist, searchExperts, teacherProfileDetails, updateStudentProfile, studentProfileDetails, teacherAvailabities, getAllCourse, studentTransactionList } = require("../controllers/common/commonController")
+const {
+    allCategories,
+    getCategorylist,
+    searchExperts,
+    teacherProfileDetails,
+    updateStudentProfile,
+    studentProfileDetails,
+    teacherAvailabities,
+    getAllCourse,
+    studentTransactionList
+} = require("../controllers/common/commonController");
 const express = require('express');
 const { xAccessToken } = require("../middlewares/xAccessToken");
 router = express.Router();
@@ -8,7 +18,7 @@ router.get('/all/categories', allCategories);
 router.get('/get/categoryList', getCategorylist);
 router.get('/search/experts', searchExperts);
 router.get('/get/all/course', getAllCourse);
-//teache realted
+//teacher api
 router.get('/teacher/profile/details', teacherProfileDetails);
 router.get('/teacher/availabities', teacherAvailabities);
 

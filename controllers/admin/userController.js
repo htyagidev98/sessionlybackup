@@ -1,5 +1,5 @@
-const User = require('../../models/user')
-const Validator = require("validatorjs")
+const User = require('../../models/user');
+const sendEmail = require('../../middlewares/emailSend');
 moment = require("moment-timezone")
 _ = require("lodash");
 
@@ -82,19 +82,31 @@ exports.getTeachersList = async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error",
-            responseMessage: "Internal Server Error", responseData: {}
+            status: "error", responseMessage: "Internal Server Error", responseData: {}
         });
     }
 };
 
-//UpdateAvailabities
+//Update Account_info.status
 exports.updateUser = async (req, res) => {
     try {
         const { _id } = req.query;
-        const data = await User.findByIdAndUpdate({ _id: _id }, { $set: { "account_info.status": "active" }, },
+        const userData = await User.findByIdAndUpdate({ _id: _id }, { $set: { "account_info.status": "active" }, },
             { new: true });
-        if (data) {
+        if (userData) {
+            const transporter = sendEmail();
+            const emailHtml = `
+            <div style="font-family: Arial, sans-serif; padding: 20px;">
+            <p style="margin-bottom: 20px;">You are receiving this email because your account is now active.</p>
+            <h4 style="color: #4285f4;">You can login with: ${userData.email}</h4>
+             </div>
+            `;
+            await transporter.sendMail({
+                from: '"stapletest" <htyagistaple246@gmail.com>',
+                to: userData.email,
+                subject: 'Account Activity Notification',
+                html: emailHtml,
+            });
             res.status(200).json({
                 status: "success", responseMessage: " User Updated Successfully", responseData: {}
             });
@@ -103,7 +115,6 @@ exports.updateUser = async (req, res) => {
                 status: "error", responseMessage: "User not found", responseData: {}
             });
         }
-        
     } catch (err) {
         console.error(err);
         res.status(500).json({
@@ -129,7 +140,9 @@ exports.deleteUser = async (req, res) => {
         }
     } catch (err) {
         console.error(err);
-        res.status(500).json({ status: "error", responseMessage: 'Internal Server Error', responseData: {} });
+        res.status(500).json({
+            status: "error", responseMessage: 'Internal Server Error', responseData: {}
+        });
     }
 };
 
