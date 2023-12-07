@@ -1,5 +1,6 @@
 const User = require('../../models/user');
 const sendEmail = require('../../middlewares/emailSend');
+const messages = require("../../utils/messages")
 moment = require("moment-timezone")
 _ = require("lodash");
 
@@ -19,20 +20,20 @@ exports.getUsersList = async (req, res) => {
             .lean();
         if (users && users.length > 0) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: users.length,
-                sponseMessage: "Successfully",
+                sponseMessage: messages.SUCCESSFULLY,
                 responseData: users,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Data Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_USERS_LIST, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -41,23 +42,25 @@ exports.getUsersList = async (req, res) => {
 exports.getStudentsList = async (req, res) => {
     try {
         const students = await User.find({ role: 'student' })
-            .select("first_name last_name email phone role account_info.status createdAt updatedAt").lean();
+            .select("first_name last_name email phone role account_info.status createdAt updatedAt")
+            .sort({ createdAt: -1 })
+            .lean();
         if (students && students.length > 0) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: students.length,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: students,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Data Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_STUDENTS, responseData: {}
             })
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -66,23 +69,25 @@ exports.getStudentsList = async (req, res) => {
 exports.getTeachersList = async (req, res) => {
     try {
         const teachers = await User.find({ role: 'expert' })
-            .select("first_name last_name email phone role account_info.status createdAt updatedAt").lean();
+            .select("first_name last_name email phone role account_info.status createdAt updatedAt")
+            .sort({ createdAt: -1 })
+            .lean();
         if (teachers && teachers.length > 0) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: teachers.length,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: teachers,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Data Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_EXPERTS, responseData: {}
             })
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -108,17 +113,17 @@ exports.updateUser = async (req, res) => {
                 html: emailHtml,
             });
             res.status(200).json({
-                status: "success", responseMessage: " User Updated Successfully", responseData: {}
+                status: messages.SUCCESS_STATUS, responseMessage: messages.USER_UPDATE, responseData: {}
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "User not found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.USER_NOT_FOUND, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -131,17 +136,17 @@ exports.deleteUser = async (req, res) => {
             { $set: { "account_info.status": "deactivate" }, }, { new: true });
         if (user) {
             res.status(200).json({
-                status: "success", responseMessage: 'Deleted Successfully', responseData: {}
+                status: messages.SUCCESS_STATUS, responseMessage: messages.USER_DELETE, responseData: {}
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: 'User Not found', responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.USER_NOT_FOUND, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: 'Internal Server Error', responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };

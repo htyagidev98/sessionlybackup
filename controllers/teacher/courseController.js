@@ -1,25 +1,27 @@
 const Course = require('../../models/course');
-const Validator = require("validatorjs")
+const Validator = require("validatorjs");
+const messages = require("../../utils/messages");
 moment = require("moment-timezone")
 _ = require("lodash");
 
 /////////Course Add Api///////
 exports.courseAdd = async (req, res) => {
     try {
-        const rules = { title: "required", description: "required", category: "required", price: "required", duration: "required" };
+        const rules = {
+            title: "required", description: "required", category: "required", price: "required", duration: "required"
+        };
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { title, description, price, category, duration } = req.body;
-            // const courseExist = await Course.findOne({ title: title }).lean();
-            // if (courseExist) {
             const coursePicturesFilename = req.file.filename;
             if (!req.file) {
                 res.status(422).json({
-                    status: "error", responseMessage: "File not provided",
+                    status: messages.ERROR_STATUS, responseMessage: messages.NO_IMAGE_FILE,
                 });
             }
             let courseData = await Course.create({
@@ -32,19 +34,13 @@ exports.courseAdd = async (req, res) => {
                 image_url: `${process.env.API_DOMAIN}/course_pictures/${coursePicturesFilename}`
             });
             res.status(201).json({
-                status: "success", responseMessage: " Course Add Successfully", responseData: courseData
+                status: messages.SUCCESS_STATUS, responseMessage: messages.ADD_COURSE, responseData: courseData
             });
-            // } else {
-            //     res.status(403).json({
-            //         status: "error", responseMessage: "Course E", responseData: {}
-            //     });
-            // }
-            // }
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 }
@@ -62,20 +58,20 @@ exports.getAllCourse = async (req, res) => {
             .lean();
         if (courseData && courseData.length > 0) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: courseData.length,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: courseData,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "No Courses ", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_COURSES_LIST, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };
@@ -103,17 +99,17 @@ exports.getCourse = async (req, res) => {
                 updatedAt: moment(course.updatedAt).format("YYYY-MM-DD h:mm:ss A"),
             };
             res.status(200).json({
-                status: "success", responseMessage: "Successfully", responseData: courseData,
+                status: messages.SUCCESS_STATUS, responseMessage: messages.SUCCESSFULLY, responseData: courseData,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Course Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_COURSE, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };
@@ -121,11 +117,14 @@ exports.getCourse = async (req, res) => {
 ////////Course Update api /////////
 exports.updateCourse = async (req, res) => {
     try {
-        const rules = { title: "required", description: "required", category: "required", price: "required", duration: "required" };
+        const rules = {
+            title: "required", description: "required", category: "required", price: "required", duration: "required"
+        };
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { title, description, price, category, duration, image_url } = req.body; // If there is no file but an image_url is provided in the req body..
@@ -150,18 +149,18 @@ exports.updateCourse = async (req, res) => {
                 const data = await Course.findByIdAndUpdate({ _id: courseData._id },
                     updateData, { new: true });
                 res.status(200).json({
-                    status: "success", responseMessage: "Update Successfully", responseData: data
+                    status: messages.SUCCESS_STATUS, responseMessage: messages.COURSE_UPDATE, responseData: data
                 });
             } else {
                 res.status(404).json({
-                    status: "error", responseMessage: "Course not found", responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.NO_COURSE, responseData: {}
                 });
             }
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -174,17 +173,17 @@ exports.deleteCourse = async (req, res) => {
             { $set: { status: "inactive" }, }, { new: true });
         if (deletedCourse) {
             res.status(200).json({
-                status: "success", responseMessage: 'Deleted Successfully', responseData: {}
+                status: messages.SUCCESS_STATUS, responseMessage: messages.DELETE_SUCCESSFULLY, responseData: {}
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: 'Course Not FOund', responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_COURSE, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: 'Internal Server Error', responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };

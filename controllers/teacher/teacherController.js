@@ -9,6 +9,7 @@ const sendEmail = require('../../middlewares/emailSend');
 // const videoDuration = require('../../middlewares/videoDuration');
 const Validator = require("validatorjs");
 const fun = require("../../middlewares/webSocket");
+const messages = require("../../utils/messages");
 moment = require("moment-timezone")
 _ = require("lodash");
 const saltRounds = 10;
@@ -20,7 +21,7 @@ exports.teacherRegister = async (req, res) => {
     try {
         const rules = {
             'user.first_name': "required", 'user.last_name': "required", 'user.email': "required",
-            'user.phone': "required|min:10|max:14", 'user.password': "required|min:8",
+            'user.phone':"required|numeric|digits_between:10,14", 'user.password': "required|min:8",
             'user.country_origin': "required", 'profile.language': "required", 'profile.level': "required",
             'profile.subject_taught': "required", 'profile.hourly_rate': "required", 'availability.time_zone': "required",
             'availability.day': "required", 'availability.time_from': "required", 'availability.time_to': "required",
@@ -28,8 +29,8 @@ exports.teacherRegister = async (req, res) => {
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error",
-                responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const videoFileSize = req.files[1].size;
@@ -43,12 +44,12 @@ exports.teacherRegister = async (req, res) => {
             const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!regex.test(email)) {
                 res.status(400).json({
-                    status: "error", responseMessage: "Invalid email address", responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.INVALID_EMAIL, responseData: {}
                 });
             } else if (!passwordRegex.test(password)) {
                 res.status(400).json({
-                    status: "error",
-                    responseMessage: "Password must have one lowercase letter, one uppercase letter, one digit, and one special character.",
+                    status: messages.ERROR_STATUS,
+                    responseMessage: messages.INVALID_PASSWORD,
                     responseData: {},
                 });
             } else {
@@ -56,7 +57,7 @@ exports.teacherRegister = async (req, res) => {
                 if (existingUser) {
                     session.endSession();
                     res.status(400).json({
-                        status: "error", responseMessage: 'Email already exists', responseData: {}
+                        status: messages.ERROR_STATUS, responseMessage: messages.EMAIL_EXISTING, responseData: {}
                     });
                 } else {
                     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -112,8 +113,8 @@ exports.teacherRegister = async (req, res) => {
                     await session.commitTransaction();
                     session.endSession();
                     res.status(201).json({
-                        status: "success",
-                        responseMessage: "Expert Registered Successfully",
+                        status: messages.SUCCESS_STATUS,
+                        responseMessage:messages.EXPERT_REGISTER,
                         responseData: user, profile, availability
                     });
                 }
@@ -124,7 +125,7 @@ exports.teacherRegister = async (req, res) => {
         await session.abortTransaction();
         session.endSession();
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -139,17 +140,17 @@ exports.getExpertAvailabity = async (req, res) => {
             ).lean();
         if (availability) {
             res.status(200).json({
-                status: "success", responseMessage: "Successfully", responseData: availability,
+                status: messages.SUCCESS_STATUS, responseMessage: messages.SUCCESSFULLY, responseData: availability,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Availability Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_AVAILBILITY, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };
@@ -161,7 +162,8 @@ exports.updateAvailabities = async (req, res) => {
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { time_zone, day, time_from, time_to } = req.body;
@@ -177,18 +179,20 @@ exports.updateAvailabities = async (req, res) => {
                 const data = await UserAvailabilities.findByIdAndUpdate({ _id: AvailabilityData._id }, updateData,
                     { new: true });
                 res.status(200).json({
-                    status: "success", responseMessage: "Expert Availability Updated Successfully", responseData: data
+                    status: messages.SUCCESS_STATUS,
+                    responseMessage: messages.UPDATE_AVAILBILITY, responseData: data
                 });
             } else {
                 res.status(404).json({
-                    status: "error", responseMessage: "Expert Availability not found", responseData: {}
+                    status: messages.ERROR_STATUS,
+                    responseMessage: messages.NO_AVAILBILITY, responseData: {}
                 });
             }
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -218,17 +222,17 @@ exports.teacherProfileDetails = async (req, res) => {
                 updatedAt: moment(ProfileData.updatedAt).format("DD-MM-YYYY h:mm:ss A"),
             }
             res.status(200).json({
-                status: "success", responseMessage: "Fetch Successfully", responseData: data,
+                status: messages.SUCCESS_STATUS, responseMessage: messages.SUCCESSFULLY, responseData: data,
             });
         } else {
             res.status(422).json({
-                status: "error", responseMessage: "No data found ", responseData: {},
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_PROFILE_DATA, responseData: {},
             });
         };
     } catch (err) {
         console.error(err)
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     };
 };
@@ -238,12 +242,13 @@ exports.updateExpertsProfile = async (req, res) => {
     try {
         const rules = {
             first_name: "required", last_name: "required", email: "required",
-            phone: "required|digits_between:10,14"
+            phone:"required|numeric|digits_between:10,14"
         };
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { first_name, last_name, email, phone } = req.body;
@@ -257,18 +262,19 @@ exports.updateExpertsProfile = async (req, res) => {
                 }
                 const data = await User.findByIdAndUpdate({ _id: user._id }, updateData, { new: true });
                 res.status(200).json({
-                    status: "success", responseMessage: " Expert Details Updated Successfully", responseData: data
+                    status: messages.SUCCESS_STATUS,
+                    responseMessage: messages.UPDATE_PROFILE_DETAILS, responseData: data
                 });
             } else {
                 res.status(404).json({
-                    status: "error", responseMessage: "Availability not found", responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.USER_NOT_FOUND, responseData: {}
                 });
             }
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -291,18 +297,18 @@ exports.updateExpertProflePicture = async (req, res) => {
             const data = await Profile.findByIdAndUpdate({ _id: profile._id }, updateData,
                 { new: true });
             res.status(200).json({
-                status: "success", responseMessage: " Profile Picture Updated Successfully", responseData: data
+                status: messages.SUCCESS_STATUS, responseMessage: messages.UPDATE_PROFILE_PIC, responseData: data
             });
 
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Profile Picture not found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_PROFILE_PIC, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -325,20 +331,20 @@ exports.StudentsList = async (req, res) => {
             .lean();
         if (studentslist && studentslist.length > 0) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: studentslist.length,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: studentslist,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Student List Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_STUDENTS, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     };
 };
@@ -364,21 +370,21 @@ exports.teacherPaymentList = async (req, res) => {
                 sum, paymentLists) => sum + paymentLists.amount, 0
             ); //total earning
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: paymentList.length,
                 totalEarning: totalAmount,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: paymentList,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Payment List Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_TRANSACTIONS_LIST, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     };
 }
@@ -397,20 +403,20 @@ exports.teacherBookAppointment = async (req, res) => {
             .lean();
         if (appointment) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: appointment.length,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: appointment,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Appointment Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_APPOINTMENTS_LIST, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };

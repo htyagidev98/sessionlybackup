@@ -1,8 +1,8 @@
 const Appointment = require('../models/appointment');
-const Validator = require("validatorjs")
+const Validator = require("validatorjs");
+const messages = require("../utils/messages");
 moment = require("moment-timezone")
 _ = require("lodash");
-
 
 //bookAPoointment
 exports.bookAppointment = async (req, res) => {
@@ -12,10 +12,10 @@ exports.bookAppointment = async (req, res) => {
             appointment_date: "required", appointment_time: "required"
         };
         const validation = new Validator(req.body, rules);
-
         if (validation.fails()) {
             res.status(422).json({
-                status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { student, teacher, course_id, appointment_date, appointment_time } = req.body;
@@ -31,19 +31,20 @@ exports.bookAppointment = async (req, res) => {
                     appointment_time: appointment_time
                 });
                 res.status(201).json({
-                    status: "success",
-                    responseMessage: "Appointment booked Successfully", responseData: appointmentData
+                    status: messages.SUCCESS_STATUS,
+                    responseMessage: messages.Book_APPOINTMENT, responseData: appointmentData
                 });
             } else {
                 res.status(403).json({
-                    status: "error", responseMessage: "Appointment already booked for this time", responseData: {}
+                    status: messages.ERROR_STATUS,
+                    responseMessage: messages.EXIST_APPOINTMENT, responseData: {}
                 });
             }
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -70,17 +71,18 @@ exports.getBookAppointment = async (req, res) => {
                 updatedAt: moment(appointment.updatedAt).format("YYYY-MM-DD h:mm:ss A")
             };
             res.status(200).json({
-                status: "success", responseMessage: "Successfully", responseData: appointmentData,
+                status: messages.SUCCESS_STATUS,
+                responseMessage: messages.SUCCESSFULLY, responseData: appointmentData,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Appointment Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NOT_APPOINTMENT, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };
@@ -99,25 +101,23 @@ exports.studentBookAppointment = async (req, res) => {
             .lean();
         if (appointment && appointment.length > 0) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: appointment.length,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: appointment,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Appointment Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_APPOINTMENTS_LIST, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };
-
-
 
 //get  Appointement time on that  date
 exports.getAppointmentTime = async (req, res) => {
@@ -130,20 +130,20 @@ exports.getAppointmentTime = async (req, res) => {
             .lean();
         if (appointmentTime && appointmentTime.length > 0) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: appointmentTime.length,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: appointmentTime,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "No Appointment ", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_APPOINTMENTS_LIST, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };

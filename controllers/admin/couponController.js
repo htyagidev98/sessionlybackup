@@ -1,15 +1,19 @@
 const Coupon = require("../../models/coupon");
+const messages = require("../../utils/messages")
 const Validator = require("validatorjs"),
-_ = require("lodash");
+    _ = require("lodash");
 
 //Add coupon
 exports.couponAdd = async (req, res) => {
     try {
-        const rules = { code: "required", amount_off: "required", start_date: "required", end_date: "required" };
+        const rules = {
+            code: "required", amount_off: "required", start_date: "required", end_date: "required"
+        };
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { code, amount_off, start_date, end_date } = req.body;
@@ -22,18 +26,18 @@ exports.couponAdd = async (req, res) => {
                     end_date: end_date,
                 })
                 res.status(201).json({
-                    status: "success", responseMessage: "Coupon created Successfully", responseData: couponData
+                    status: messages.SUCCESS_STATUS, responseMessage: messages.ADD_COUPON, responseData: couponData
                 });
             } else {
                 res.status(403).json({
-                    status: "error", responseMessage: "Coupon Already Exist", responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.EXIST_COUPON, responseData: {}
                 });
             }
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -47,24 +51,23 @@ exports.getAllCoupon = async (req, res) => {
             .lean();
         if (coupons && coupons.length > 0) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: coupons.length,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: coupons,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "coupons Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_COUPON, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
-
 
 //get coupon
 exports.getCoupon = async (req, res) => {
@@ -73,17 +76,17 @@ exports.getCoupon = async (req, res) => {
         const couponData = await Coupon.findOne({ _id: _id }).lean();
         if (couponData) {
             res.status(200).json({
-                status: "success", responseMessage: "Successfully", responseData: couponData,
+                status: messages.SUCCESS_STATUS, responseMessage: messages.SUCCESSFULLY, responseData: couponData,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Coupon Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_COUPON, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };
@@ -95,7 +98,7 @@ exports.updateCoupon = async (req, res,) => {
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                responseMessage: "Validation Error", responseData: validation.errors.all(),
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { code, amount_off, start_date, end_date } = req.body;
@@ -111,18 +114,18 @@ exports.updateCoupon = async (req, res,) => {
                 }
                 const data = await Coupon.findByIdAndUpdate({ _id: couponData._id }, updatedData, { new: true });
                 res.status(200).json({
-                    responseMessage: "Coupon Updated Successfully", responseData: data
+                    responseMessage: messages.UPDATE_COUPON, responseData: data
                 });
             } else {
                 res.status(404).json({
-                    responseMessage: "Data not found", responseData: {},
+                    responseMessage: messages.NO_COUPON, responseData: {},
                 });
             };
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };
@@ -135,17 +138,17 @@ exports.deleteCoupon = async (req, res) => {
             { $set: { status: "inactive" }, }, { new: true });
         if (couponData) {
             res.status(200).json({
-                status: "success", esponseMessage: 'Deleted Successfully', responseData: {}
+                status: messages.SUCCESS_STATUS, esponseMessage:messages.DELETE_COUPON, responseData: {}
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: 'Coupon Not Found', responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_COUPON, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: 'Internal Server Error', responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 }

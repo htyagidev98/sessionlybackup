@@ -1,10 +1,11 @@
-const Category = require('../../models/category')
-const Course = require('../../models/course')
-const Profile = require('../../models/profile')
-const Payment = require('../../models/payment')
-const UserAvailabilities = require('../../models/userAvailabities')
-const User = require('../../models/user')
-const Validator = require("validatorjs")
+const Category = require('../../models/category');
+const Course = require('../../models/course');
+const Profile = require('../../models/profile');
+const Payment = require('../../models/payment');
+const UserAvailabilities = require('../../models/userAvailabities');
+const User = require('../../models/user');
+const Validator = require("validatorjs");
+const messages = require("../../utils/messages");
 moment = require("moment-timezone")
 config = require('../../config')
 _ = require("lodash");
@@ -24,20 +25,20 @@ exports.allCategories = async (req, res) => {
             .lean();
         if (categories && categories.length > 0) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: categories.length,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: categories,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Categories Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_CATEGORIES, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };
@@ -55,20 +56,20 @@ exports.getCategorylist = async (req, res) => {
             .lean();
         if (categories && categories.length > 0) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: categories.length,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: categories,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "categories Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_CATEGORIES, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -161,27 +162,26 @@ exports.searchExperts = async (req, res) => {
                     expertData.push(expertObj);
                 }
                 res.status(200).json({
-                    status: "success",
+                    status: messages.SUCCESS_STATUS,
                     counts: expertData.length,
-                    responseMessage: "Successfully",
+                    responseMessage: messages.SUCCESSFULLY,
                     responseData: expertData,
                 });
             }
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "No data found.", responseData: [],
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_FILTER_DATA, responseData: [],
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
 
-
-// Get TEACHER Profile details
+//Get TEACHER Profile details
 exports.teacherProfileDetails = async (req, res) => {
     try {
         const { teacherId } = req.query;
@@ -207,17 +207,17 @@ exports.teacherProfileDetails = async (req, res) => {
                 updatedAt: moment(ProfileData.updatedAt).format("DD-MM-YYYY h:mm:ss A"),
             }
             res.status(200).json({
-                status: "success", responseMessage: "Fetch Successfully", responseData: data,
+                status: messages.SUCCESS_STATUS, responseMessage: messages.SUCCESSFULLY, responseData: data,
             });
         } else {
             res.status(422).json({
-                status: "error", responseMessage: "No data found ", responseData: {},
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_PROFILE_DATA, responseData: {},
             });
         };
     } catch (err) {
         console.error(err)
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     };
 };
@@ -240,17 +240,17 @@ exports.teacherAvailabities = async (req, res) => {
                 updatedAt: moment(availableData.updatedAt).format("YYYY-MM-DD h:mm:ss A"),
             }
             res.status(200).json({
-                status: "success", responseMessage: "Fetch Successfully", responseData: data,
+                status: messages.SUCCESS_STATUS, responseMessage: messages.SUCCESSFULLY, responseData: data,
             });
         } else {
             res.status(422).json({
-                status: "error", responseMessage: "No data found ", responseData: {},
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_AVAILBILITY, responseData: {},
             });
         };
     } catch (err) {
         console.error(err)
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     };
 };
@@ -267,25 +267,25 @@ exports.getAllCourse = async (req, res) => {
             }]).sort({ createdAt: -1 }).lean();
         if (course && course.length > 0) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: course.length,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: course,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Courses Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_COURSE_LIST, responseData: {}
             })
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
 
-/// Get STUDENT Transaction list////
+//Get STUDENT Transaction list
 exports.studentTransactionList = async (req, res) => {
     try {
         const transactionList = await Payment.find({ student: req.user._id })
@@ -306,24 +306,26 @@ exports.studentTransactionList = async (req, res) => {
                 sum, transactionLists) => sum + transactionLists.amount, 0
             ); //total transtion
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: transactionList.length,
                 totalPay: totalAmount,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: transactionList,
             });
         } else {
-            res.status(404).json({ status: "error", responseMessage: "Payment List Not Found", responseData: {} });
+            res.status(404).json({
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_TRANSACTIONS_LIST, responseData: {}
+            });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     };
 }
 
-////Get Student Profile details///
+//Get Student Profile details
 exports.studentProfileDetails = async (req, res) => {
     try {
         let studentData = await User.findById(req.user._id).lean();
@@ -340,17 +342,17 @@ exports.studentProfileDetails = async (req, res) => {
                 updatedAt: moment(studentData.updatedAt).format("YYYY-MM-DD h:mm:ss A")
             }
             res.status(200).json({
-                status: "success", responseMessage: "Fetch Successfully", responseData: data,
+                status: messages.SUCCESS_STATUS, responseMessage: messages.SUCCESSFULLY, responseData: data,
             });
         } else {
             res.status(422).json({
-                status: "error", responseMessage: "No data found ", responseData: {},
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_PROFILE_DATA, responseData: {},
             });
         };
     } catch (err) {
         console.error(err)
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     };
 };
@@ -358,18 +360,21 @@ exports.studentProfileDetails = async (req, res) => {
 //EditStudentDetails
 exports.updateStudentProfile = async (req, res) => {
     try {
-        const rules = { first_name: "required", last_name: "required", email: "required", phone: "required|digits_between:10,14" };
+        const rules = {
+            first_name: "required", last_name: "required", email: "required", phone: "required|numeric|digits_between:10,14"
+        };
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { first_name, last_name, email, phone } = req.body;
             const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!regex.test(email)) {
                 res.status(400).json({
-                    status: "error", responseMessage: "Invalid email address", responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.INVALID_EMAIL, responseData: {}
                 });
             }
             let user = await User.findById(req.user._id).lean();
@@ -382,18 +387,19 @@ exports.updateStudentProfile = async (req, res) => {
                 }
                 const data = await User.findByIdAndUpdate({ _id: user._id }, updateData, { new: true });
                 res.status(200).json({
-                    status: "success", responseMessage: " Expert Details Updated Successfully", responseData: data
+                    status: messages.SUCCESS_STATUS,
+                    responseMessage: messages.UPDATE_PROFILE_DETAILS, responseData: data
                 });
             } else {
                 res.status(404).json({
-                    status: "error", responseMessage: "Availability not found", responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.USER_NOT_FOUND, responseData: {}
                 });
             }
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };

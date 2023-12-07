@@ -1,4 +1,5 @@
-const Category = require('../../models/category')
+const Category = require('../../models/category');
+const messages = require("../../utils/messages");
 const Validator = require("validatorjs"),
     _ = require("lodash");
 
@@ -9,9 +10,8 @@ exports.categoryAdd = async (req, res) => {
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             return res.status(422).json({
-                status: "error",
-                responseMessage: "Validation Error",
-                responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         };
         const { title, description, sub_title, sub_description } = req.body;
@@ -20,8 +20,8 @@ exports.categoryAdd = async (req, res) => {
             const categoryPicturesFilename = req.file.filename;
             if (!req.file) {
                 return res.status(422).json({
-                    status: "error",
-                    responseMessage: "File not provided",
+                    status: messages.ERROR_STATUS,
+                    responseMessage: messages.NO_IMAGE_FILE,
                 });
             }
             let newCategory = await Category.create({
@@ -30,7 +30,7 @@ exports.categoryAdd = async (req, res) => {
                 image_url: `${process.env.API_DOMAIN}/category_pictures/${categoryPicturesFilename}`,
             });
             return res.status(201).json({
-                status: "success", responseMessage: "Category Added Successfully", responseData: newCategory,
+                status: messages.SUCCESS_STATUS, responseMessage: messages.ADD_CATEGORY, responseData: newCategory,
             });
         } else {
             const existingSubcategory = existingCategory.subcategories.find(
@@ -38,7 +38,7 @@ exports.categoryAdd = async (req, res) => {
             );
             if (existingSubcategory) {
                 return res.status(422).json({
-                    status: "error", responseMessage: "Subcategory already exists in the category", responseData: {},
+                    status: messages.ERROR_STATUS, responseMessage: messages.SUB_CATEGORY_EXIST, responseData: {},
 
                 });
             }
@@ -53,13 +53,14 @@ exports.categoryAdd = async (req, res) => {
                 { new: true }
             );
             return res.status(201).json({
-                status: "success", responseMessage: "Category Updated Successfully", responseData: categoryData,
+                status: messages.SUCCESS_STATUS,
+                responseMessage: messages.UPDATE_CATEGORY, responseData: categoryData,
             });
         }
     } catch (err) {
         console.error(err);
         return res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };
@@ -78,20 +79,20 @@ exports.getAllCategory = async (req, res) => {
             .lean();
         if (categories && categories.length > 0) {
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: categories.length,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: categories,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "Categories Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_CATEGORIES, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };
@@ -105,15 +106,17 @@ exports.getCategory = async (req, res) => {
             .lean();
         if (categoryData) {
             res.status(200).json({
-                status: "success", responseMessage: "Successfully", responseData: categoryData,
+                status: messages.SUCCESS_STATUS, responseMessage: messages.SUCCESSFULLY, responseData: categoryData,
             });
         } else {
-            res.status(404).json({ status: "error", responseMessage: "Category Not Found", responseData: {} });
+            res.status(404).json({
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_CATEGORY, responseData: {}
+            });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     }
 };
@@ -125,7 +128,8 @@ exports.updateCategory = async (req, res) => {
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { title, description, image_url } = req.body; // If there is no file but an image_url is provided in the req body..
@@ -147,19 +151,19 @@ exports.updateCategory = async (req, res) => {
                 const data = await Category.findByIdAndUpdate({ _id: categoryData._id }, updateData,
                     { new: true });
                 res.status(200).json({
-                    status: "success", responseMessage: "Updated Successfully", responseData: data
+                    status: messages.SUCCESS_STATUS, responseMessage: messages.UPDATE_CATEGORY, responseData: data
                 });
 
             } else {
                 res.status(404).json({
-                    status: "error", responseMessage: "Category not found", responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.NO_CATEGORY, responseData: {}
                 });
             }
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -172,17 +176,17 @@ exports.deleteCategory = async (req, res) => {
             { $set: { status: "inactive" }, }, { new: true });
         if (deletedCategory) {
             res.status(200).json({
-                status: "success", responseMessage: 'Deleted Successfully', responseData: {}
+                status: messages.SUCCESS_STATUS, responseMessage: messages.DELETE_CATEGORY, responseData: {}
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: 'Category Not Found', responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_CATEGORY, responseData: {}
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: 'Internal Server Error', responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };

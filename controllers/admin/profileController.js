@@ -1,5 +1,6 @@
-const User = require('../../models/user')
-const Validator = require("validatorjs")
+const User = require('../../models/user');
+const Validator = require("validatorjs");
+const messages = require("../../utils/messages")
 moment = require("moment-timezone")
 _ = require("lodash");
 
@@ -20,17 +21,17 @@ exports.adminProfileDetails = async (req, res) => {
                 updatedAt: moment(adminData.updatedAt).format("DD-MM-YYYY h:mm:ss A")
             }
             res.status(200).json({
-                status: "success", responseMessage: "Fetch Successfully", responseData: data,
+                status: messages.SUCCESS_STATUS, responseMessage: messages.SUCCESSFULLY, responseData: data,
             });
         } else {
             res.status(422).json({
-                status: "error", responseMessage: "No data found ", responseData: {},
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_PROFILE_DATA, responseData: {},
             });
         };
     } catch (err) {
         console.error(err)
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {},
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
     };
 };
@@ -38,18 +39,21 @@ exports.adminProfileDetails = async (req, res) => {
 //update admin profile details//
 exports.updateProfile = async (req, res) => {
     try {
-        const rules = { first_name: "required", last_name: "required", email: "required", phone: "required|digits_between:10,14" };
+        const rules = {
+            first_name: "required", last_name: "required", email: "required", phone: "required|numeric|digits_between:10,14"
+        };
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { first_name, last_name, email, phone } = req.body;
             const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!regex.test(email)) {
                 res.status(400).json({
-                    status: "error", responseMessage: "Invalid email address", responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.INVALID_EMAIL, responseData: {}
                 });
             }
             let adminData = await User.findById(req.user._id).lean();
@@ -62,18 +66,19 @@ exports.updateProfile = async (req, res) => {
                 }
                 await User.findByIdAndUpdate({ _id: adminData._id }, updateData, { new: true });
                 res.status(200).json({
-                    status: "success", responseMessage: " Expert Details Updated Successfully", responseData: updateData
+                    status: messages.SUCCESS_STATUS,
+                    responseMessage: messages.UPDATE_PROFILE_DETAILS, responseData: updateData
                 });
             } else {
                 res.status(404).json({
-                    status: "error", responseMessage: "Availability not found", responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.NO_ADMIN, responseData: {}
                 });
             }
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };

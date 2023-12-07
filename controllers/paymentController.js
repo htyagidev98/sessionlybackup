@@ -1,8 +1,9 @@
 const Payment = require("../models/payment");
 const Validator = require("validatorjs");
-const config = require("../config")
+const config = require("../config");
 const stripe = require('stripe')(config.STRIPE_SECRET);
 const fun = require("../middlewares/webSocket");
+const messages = require("../utils/messages");
 moment = require("moment-timezone");
 _ = require("lodash");
 
@@ -15,7 +16,8 @@ exports.userPayment = async (req, res) => {
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error", responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { token, amount, course_id, coupon_id, teacher_id } = req.body;
@@ -70,13 +72,14 @@ exports.userPayment = async (req, res) => {
                 fun.paymentNotification(data)
             }
             res.status(200).json({
-                status: "success", responseMessage: "Successfully", responseData: paymentIntentconfirm
+                status: messages.SUCCESS_STATUS,
+                responseMessage: messages.PAYMENT_SUCCESS, responseData: paymentIntentconfirm
             });
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 
@@ -88,7 +91,8 @@ exports.paymentConfirm = async (req, res) => {
         const { payment_intent_id } = req.body;
         if (typeof payment_intent_id !== 'string' || !payment_intent_id) {
             res.status(400).json({
-                status: "error", responseMessage: "Invalid or missing payment intent ID", responseData: {}
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.INVALID_PAYMENT_ID, responseData: {}
             });
         }
         const confirmintent = await stripe.paymentIntents.retrieve(payment_intent_id);
@@ -106,12 +110,13 @@ exports.paymentConfirm = async (req, res) => {
         // console.log("data", data)
         fun.paymentNotification(data)
         res.status(201).json({
-            status: "success", responseMessage: "Payment Successfully", responseData: { confirmintent, data }
+            status: messages.SUCCESS_STATUS,
+            responseMessage: messages.PAYMENT_SUCCESS, responseData: { confirmintent, data }
         });
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 }
@@ -135,21 +140,21 @@ exports.getPaymentList = async (req, res) => {
                 sum, paymentLists) => sum + paymentLists.amount, 0
             );
             res.status(200).json({
-                status: "success",
+                status: messages.SUCCESS_STATUS,
                 counts: paymentList.length,
                 totalAmount: totalAmount,
-                responseMessage: "Successfully",
+                responseMessage: messages.SUCCESSFULLY,
                 responseData: paymentList,
             });
         } else {
             res.status(404).json({
-                status: "error", responseMessage: "paymentList Not Found", responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_TRANSACTIONS_LIST, responseData: {}
             })
         }
     } catch (err) {
         console.error(err);
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };

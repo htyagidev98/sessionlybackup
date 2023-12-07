@@ -15,14 +15,14 @@ _ = require("lodash");
 exports.signUp = async (req, res) => {
     try {
         const rules = {
-            first_name: "required", last_name: "required", email: "required", phone: "required|digits_between:10,14",
+            first_name: "required", last_name: "required", email: "required", phone: "required|numeric|digits_between:10,14",
             password: "required|min:8", confirm_password: "required"
         };
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error",
-                responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { first_name, last_name, email, password, confirm_password, phone } = req.body;
@@ -30,17 +30,17 @@ exports.signUp = async (req, res) => {
             const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!regex.test(email)) {
                 res.status(400).json({
-                    status: "error", responseMessage: "Invalid email address", responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.INVALID_EMAIL, responseData: {}
                 });
             } else if (!passwordRegex.test(password)) {
                 res.status(400).json({
-                    status: "error",
-                    responseMessage: "Password must have one lowercase letter, one uppercase letter, one digit, and one special character.",
+                    status: messages.ERROR_STATUS,
+                    responseMessage: messages.INVALID_PASSWORD,
                     responseData: {},
                 });
             } else if (password !== confirm_password) {
                 res.status(400).json({
-                    status: "error", responseMessage: 'Password and Confirm Password do not match', responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.PASSWORD_CONFIRM_PASSWORD_NOT_MATCH, responseData: {}
                 });
             } else {
                 const checkEmail = await User.findOne({ email: email }).lean();
@@ -56,11 +56,11 @@ exports.signUp = async (req, res) => {
                     });
                     fun.webNotification(userData);
                     res.status(201).json({
-                        status: "success", responseMessage: messages.SIGN_UP_SUCCESS, responseData: userData
+                        status: messages.SUCCESS_STATUS, responseMessage: messages.SIGN_UP_SUCCESS, responseData: userData
                     });
                 } else {
                     res.status(403).json({
-                        status: "error", responseMessage: "Email Already in Use", responseData: {}
+                        status: messages.ERROR_STATUS, responseMessage: messages.EMAIL_EXISTING, responseData: {}
                     });
                 }
             }
@@ -68,7 +68,7 @@ exports.signUp = async (req, res) => {
     } catch (err) {
         console.error(err)
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -80,8 +80,8 @@ exports.logIn = async (req, res) => {
         const validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error",
-                responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             });
         } else {
             const { email, password } = req.body;
@@ -90,7 +90,7 @@ exports.logIn = async (req, res) => {
                 if (user.account_info.status == "active") {
                     if (!bcrypt.compareSync(password, user.password)) {
                         res.status(400).json({
-                            status: "error", responseMessage: "Invalid Credentials", responseData: {}
+                            status: messages.ERROR_STATUS, responseMessage: messages.INVALID_CREDENATILS, responseData: {}
                         });
                     } else {
                         const payload = {
@@ -127,19 +127,19 @@ exports.logIn = async (req, res) => {
                     }
                 } else {
                     res.status(403).json({
-                        status: "error", responseMessage: "Account is not Active!", responseData: {}
+                        status: messages.ERROR_STATUS, responseMessage: messages.ACCOUNT_STATUS, responseData: {}
                     });
                 }
             } else {
                 res.status(404).json({
-                    status: "error", responseMessage: "User not found", responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.USER_NOT_FOUND, responseData: {}
                 });
             }
         };
     } catch (err) {
         console.error(err)
         res.status(500).json({
-            status: "error", responseMessage: "Internal Server Error", responseData: {}
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
         });
     }
 };
@@ -151,8 +151,8 @@ exports.forgotPassword = async (req, res) => {
         var validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error",
-                responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             })
         } else {
             const { email } = req.body;
@@ -183,8 +183,8 @@ exports.forgotPassword = async (req, res) => {
                 });
                 await User.findOneAndUpdate({ _id: user._id }, { $set: data }, { new: true });
                 res.status(200).json({
-                    status: "success",
-                    responseMessage: "Link sent successfully. Please check your Email",
+                    status: messages.SUCCESS_STATUS,
+                    responseMessage: messages.SEND_LINK,
                     responseData: {
                         id: user._id,
                         email: user.email,
@@ -194,13 +194,15 @@ exports.forgotPassword = async (req, res) => {
                 });
             } else {
                 res.status(400).json({
-                    status: "error", responseMessage: "User Not Found", responseData: {}
+                    status: messages.ERROR_STATUS, responseMessage: messages.USER_NOT_FOUND, responseData: {}
                 });
             }
         }
     } catch (err) {
         console.error(err);
-        res.status(500).json({ status: "error", responseMessage: "Internal Server Error", responseData: {} });
+        res.status(500).json({
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {}
+        });
     }
 };
 
@@ -211,8 +213,8 @@ exports.resetPassword = async (req, res) => {
         var validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error",
-                responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             })
         } else {
             const { reset_token } = req.query;
@@ -220,14 +222,14 @@ exports.resetPassword = async (req, res) => {
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).*$/;
             if (!passwordRegex.test(new_password)) {
                 res.status(400).json({
-                    status: "error",
-                    responseMessage: "new_password must have one lowercase letter, one uppercase letter, one digit, and one special character.",
+                    status: messages.ERROR_STATUS,
+                    responseMessage: messages.INVALID_PASSWORD,
                     responseData: {},
                 });
             } else if (new_password !== confirm_password) {
                 res.status(400).json({
-                    status: "error",
-                    responseMessage: 'new_password and Confirm Password do not match', responseData: {}
+                    status: messages.ERROR_STATUS,
+                    responseMessage: messages.NEW_PASSWORD_CONFIRM_PASSWORD_NOT_MATCH, responseData: {}
                 });
             } else {
                 let user = await User.findOne({ 'auth.resetToken': reset_token, "auth.expires": { $gte: new Date() } }).lean();
@@ -235,22 +237,22 @@ exports.resetPassword = async (req, res) => {
                     let newhash = bcrypt.hashSync(new_password, 10);
                     await User.findOneAndUpdate({ _id: user._id }, { $set: { password: newhash } }, { new: true });
                     res.status(201).json({
-                        status: "success",
-                        responseMessage: "Reset Password Successfully"
+                        status: messages.SUCCESS_STATUS, responseMessage: messages.RESET_PASSWORD
                     });
                 } else {
                     res.status(400).json({
-                        status: "error",
-                        responseMessage: "Invalid Token.", responseData: {},
+                        status: messages.ERROR_STATUS, responseMessage: messages.INVALID_RESET_TOKEN, responseData: {},
                     });
                 };
             }
         }
     } catch (err) {
         console.error(err)
-        res.status(500).json({ responseMessage: "Internal Server Error", responseData: {}, })
+        res.status(500).json({
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
+        })
     }
-}
+};
 
 ////ResetPassword API///
 exports.changePassword = async (req, res) => {
@@ -259,17 +261,15 @@ exports.changePassword = async (req, res) => {
         var validation = new Validator(req.body, rules);
         if (validation.fails()) {
             res.status(422).json({
-                status: "error",
-                responseMessage: "Validation Error", responseData: validation.errors.all(),
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.VALIDATION_ERROR, responseData: validation.errors.all(),
             })
         } else {
             const { old_password, new_password } = req.body;
             const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=!]).*$/;
             if (!passwordRegex.test(new_password)) {
                 res.status(400).json({
-                    status: "error",
-                    responseMessage: "new_password must have one lowercase letter, one uppercase letter, one digit, and one special character.",
-                    responseData: {},
+                    status: messages.ERROR_STATUS, responseMessage: messages.INVALID_PASSWORD, responseData: {},
                 });
             } else {
                 let user = await User.findById(req.user._id).lean();
@@ -289,39 +289,44 @@ exports.changePassword = async (req, res) => {
                                     password: newhash,
                                     device: device,
                                 }
-                                const data = await User.findOneAndUpdate({ _id: req.user._id }, { $set: updateData }, { new: true });
+                                const data = await User.findOneAndUpdate({ _id: req.user._id },
+                                    { $set: updateData }, { new: true });
                                 if (!data) {
                                     res.status(422).json({
-                                        status: "error",
-                                        responseMessage: "Data Not Updateing!", responseData: {},
+                                        status: messages.ERROR_STATUS,
+                                        responseMessage: messages.PASSWORD_NOT_UPDATE, responseData: {},
                                     });
                                 } else {
                                     res.status(201).json({
-                                        status: "success",
-                                        responseMessage: "Change Password Successfully", responseData: {}
+                                        status: messages.SUCCESS_STATUS,
+                                        responseMessage: messages.CHANGE_PASSWORD_SUCCESS, responseData: {}
                                     });
                                 }
                             } else {
                                 res.status(400).json({
-                                    status: "error", responseMessage: "Old Password is Wrong", responseData: {},
+                                    status: messages.ERROR_STATUS,
+                                    responseMessage: messages.OLD_PASSWORD_WRONG, responseData: {},
                                 })
                             }
                         });
                     } else {
                         res.status(400).json({
-                            status: "error", responseMessage: "Old and new passwords cannot be the same.", responseData: {},
+                            status: messages.ERROR_STATUS,
+                            responseMessage: messages.OLD_NEW_PASSWORD_NOT_SAME, responseData: {},
                         });
                     };
                 } else {
                     res.status(400).json({
-                        status: "error", responseMessage: "User not Found", responseData: {}
+                        status: messages.ERROR_STATUS, responseMessage: messages.USER_NOT_FOUND, responseData: {}
                     })
                 }
             }
         }
     } catch (err) {
         console.error(err)
-        res.status(500).json({ status: "error", responseMessage: "Internal Server Error", responseData: {}, })
+        res.status(500).json({
+            status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
+        })
     }
 
 };
