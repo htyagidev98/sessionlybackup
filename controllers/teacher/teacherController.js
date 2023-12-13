@@ -121,7 +121,7 @@ exports.teacherRegister = async (req, res) => {
             }
         }
     } catch (err) {
-        console.log(err)
+        console.error(err);
         await session.abortTransaction();
         session.endSession();
         res.status(500).json({

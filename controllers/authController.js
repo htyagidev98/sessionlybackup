@@ -40,7 +40,8 @@ exports.signUp = async (req, res) => {
                 });
             } else if (password !== confirm_password) {
                 res.status(400).json({
-                    status: messages.ERROR_STATUS, responseMessage: messages.PASSWORD_CONFIRM_PASSWORD_NOT_MATCH, responseData: {}
+                    status: messages.ERROR_STATUS,
+                    responseMessage: messages.PASSWORD_CONFIRM_PASSWORD_NOT_MATCH, responseData: {}
                 });
             } else {
                 const checkEmail = await User.findOne({ email: email }).lean();
@@ -56,7 +57,8 @@ exports.signUp = async (req, res) => {
                     });
                     fun.webNotification(userData);
                     res.status(201).json({
-                        status: messages.SUCCESS_STATUS, responseMessage: messages.SIGN_UP_SUCCESS, responseData: userData
+                        status: messages.SUCCESS_STATUS,
+                        responseMessage: messages.SIGN_UP_SUCCESS, responseData: userData
                     });
                 } else {
                     res.status(403).json({
@@ -98,7 +100,7 @@ exports.logIn = async (req, res) => {
                             last_name: user.last_name, email: user.email,
                             role: user.role
                         };
-                        let token = jwt.sign(payload, config.secret);  //{ expiresIn: '30d' }
+                        let token = jwt.sign(payload, config.secret,);  //{ expiresIn: '30d' }
                         let uuid = uuidv1();
                         let deviceInfo = [];
                         deviceInfo = _.filter(user.device, (device) => device.uuid != uuid);

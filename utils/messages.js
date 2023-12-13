@@ -55,7 +55,7 @@ const messages = {
     //Admin User Controller
     USER_DELETE: "User Deleted Successfully",
     USER_UPDATE: "User Updated Successfully",
-    NO_EXPERTS: "NO Experts List",
+    NO_EXPERTS_LIST: "NO Experts List",
     NO_USERS_LIST: "No Users List",
 
     //profile Controller
@@ -82,5 +82,11 @@ const messages = {
     //PAYMENT
     PAYMENT_SUCCESS: "Payment Successfully",
     INVALID_PAYMENT_ID: "Invalid or missing payment intent ID",
+
+    //Xaccess middleware token Messages
+    TOKEN_PROVIDED: "Bearer Token not Provided",
+    INVALID_TOKEN: "Invalid Access Token",
+    UNAUTHORIZED_USER: "Unauthorized User",
+    UNAUTHORIZED_TOKEN: "Unauthorized Access Token"
 }
 module.exports = messages;

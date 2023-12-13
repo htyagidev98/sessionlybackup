@@ -4,7 +4,6 @@ module.exports = {
 
     //Register Notification admin
     webNotification: async (data) => {
-        // console.log(data,"data")
         if (data.role !== 'expert') {
             var notificationData = {}
             notificationData = {
@@ -29,7 +28,6 @@ module.exports = {
                 status: data.account_info.status
 
             }
-            // console.log("notificationData", notificationData)
             io.emit('notification', { message: "New Expert Register", notificationData })
             await Notification.create(notificationData)
         }

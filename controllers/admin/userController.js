@@ -81,7 +81,7 @@ exports.getTeachersList = async (req, res) => {
             });
         } else {
             res.status(404).json({
-                status: messages.ERROR_STATUS, responseMessage: messages.NO_EXPERTS, responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_EXPERTS_LIST, responseData: {}
             })
         }
     } catch (err) {

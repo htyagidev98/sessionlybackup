@@ -1,16 +1,15 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
-const User = require('../models/user')
-const nodemailer = require('nodemailer')
+const User = require('../models/user');
+const messages = require("../utils/messages")
 
 //Protected Routes token base
-
 module.exports = {
     xAccessToken: async (req, res, next) => {
         const authHeader = req.headers['authorization'];
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(400).json({
-                status: "error", responseMessage: "Bearer Token not Provided.",
+                status: messages.ERROR_STATUS, responseMessage: messages.TOKEN_PROVIDED,
             });
         }
         const token = authHeader.split(' ')[1];
@@ -18,7 +17,7 @@ module.exports = {
             jwt.verify(token, config.secret, async (err, decoded) => {
                 if (err) {
                     return res.status(400).json({
-                        status: "error", responseMessage: "Invalid Access Token",
+                        status: messages.ERROR_STATUS, responseMessage: messages.INVALID_TOKEN,
                     });
                 } else {
                     var authenticate = await User.findOne({
@@ -35,14 +34,14 @@ module.exports = {
                         next();
                     } else {
                         return res.status(401).json({
-                            status: "error", responseMessage: "Unauthorized",
+                            status: messages.ERROR_STATUS, responseMessage: messages.UNAUTHORIZED_USER,
                         });
                     }
                 }
             });
         } else {
             return res.status(400).json({
-                status: "error", responseMessage: "Unauthorized Access Token",
+                status: messages.ERROR_STATUS, responseMessage: messages.UNAUTHORIZED_TOKEN,
             });
         }
     },
@@ -54,8 +53,8 @@ module.exports = {
             next();
         } else {
             return res.status(403).json({
-                status: "error",
-                responseMessage: "Unauthorized User.",
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.INVALID_TOKEN,
             });
         }
     },
@@ -66,11 +65,9 @@ module.exports = {
             next();
         } else {
             return res.status(403).json({
-                status: "error",
-                responseMessage: "Unauthorized User.",
+                status: messages.ERROR_STATUS,
+                responseMessage: messages.INVALID_TOKEN,
             });
         }
     },
-
-
 };

@@ -274,7 +274,7 @@ exports.getAllCourse = async (req, res) => {
             });
         } else {
             res.status(404).json({
-                status: messages.ERROR_STATUS, responseMessage: messages.NO_COURSE_LIST, responseData: {}
+                status: messages.ERROR_STATUS, responseMessage: messages.NO_COURSES_LIST, responseData: {}
             })
         }
     } catch (err) {
@@ -284,6 +284,8 @@ exports.getAllCourse = async (req, res) => {
         });
     }
 };
+
+////STUDENT ACCESS
 
 //Get STUDENT Transaction list
 exports.studentTransactionList = async (req, res) => {

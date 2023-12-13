@@ -107,7 +107,6 @@ exports.paymentConfirm = async (req, res) => {
             teacher_id: confirmintent.metadata.teacher_id,
             status: confirmintent.status
         });
-        // console.log("data", data)
         fun.paymentNotification(data)
         res.status(201).json({
             status: messages.SUCCESS_STATUS,

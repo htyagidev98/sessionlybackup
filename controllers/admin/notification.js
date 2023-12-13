@@ -21,7 +21,7 @@ exports.getAllNotifications = async (req, res) => {
             });
         }
     } catch (err) {
-        console.log(err)
+        console.error(err);
         res.status(500).json({
             status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
@@ -48,7 +48,7 @@ exports.markOneNotificationasread = async (req, res) => {
             });
         }
     } catch (err) {
-        console.log(err)
+        console.error(err);
         res.status(500).json({
             status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
@@ -73,7 +73,7 @@ exports.markAllNotificationasread = async (req, res) => {
             });
         }
     } catch (err) {
-        console.log(err)
+        console.error(err);
         res.status(500).json({
             status: messages.ERROR_STATUS, responseMessage: messages.SERVER_ERROR, responseData: {},
         });
