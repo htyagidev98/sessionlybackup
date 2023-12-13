@@ -38,7 +38,7 @@ app.use(bodyParser.urlencoded({
 
 // Server running port
 const http = app.listen(process.env.PORT, process.env.BASE_URL, () => {
-    console.log(`Server running at http://${process.env.BASE_URL}:${process.env.PORT}`);
+    console.log(`Server running at ${process.env.PORT}`);
 });
 
 // Session middleware
