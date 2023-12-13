@@ -4,7 +4,7 @@ module.exports = {
     init: httpServer => {
         io = require('socket.io')(httpServer, {
             cors: {
-                origin: "http://localhost:5173",
+                origin: "*",
                 methods: "GET,POST,PUT,DELETE,OPTIONS",
                 // allowedHeaders: ["my-custom-header"],
                 credentials: true
